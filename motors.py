@@ -22,8 +22,15 @@ class Motor:
     #self.pwm1.duty_u16(int(65535*30/100))
     self.pwm1.duty_u16(int(65535*speed/100))
 
+class TrackSensor(self, pin):
+    def __init__(self, pin):
+        self.pin = Pin(15, Pin.IN, Pin.PULL_DOWN)
+        self.value = self.pin.value()
+
 motor1 = Motor(7,6)
 motor2 = Motor(4,5)
+sensor1 = TrackSensor(15)
+sensor2 = TrackSensor(14)
 
 def forward(motor1, motor2, speed):
     motor1.Forward(speed)
@@ -46,8 +53,10 @@ def stop(motor1, motor2):
     motor2.off()
 
 while True:
-    right_val=right_ir.value() #Getting right IR value(0 or 1)
-    left_val=left_ir.value() #Getting left IR value(0 or 1)
+    right_val = sensor1.value()
+    left_val = sensor2.value()
+    #right_val=right_ir.value() #Getting right IR value(0 or 1)
+    #left_val=left_ir.value() #Getting left IR value(0 or 1)
     # Controlling robot direction based on IR value
     if right_val==0 and left_val==0:
         forward()
