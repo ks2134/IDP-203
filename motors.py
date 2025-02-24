@@ -24,13 +24,13 @@ class Motor:
 
 class TrackSensor(self, pin):
     def __init__(self, pin):
-        self.pin = Pin(15, Pin.IN, Pin.PULL_DOWN)
+        self.pin = Pin(pin, Pin.IN, Pin.PULL_DOWN)
         self.value = self.pin.value()
 
 motor1 = Motor(7,6)
 motor2 = Motor(4,5)
-sensor1 = TrackSensor(15)
-sensor2 = TrackSensor(14)
+sensor1 = TrackSensor(15)#right
+sensor2 = TrackSensor(14)#left
 speed = 30
 
 def forward(motor1, motor2, speed):
