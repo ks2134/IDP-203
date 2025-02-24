@@ -31,6 +31,7 @@ motor1 = Motor(7,6)
 motor2 = Motor(4,5)
 sensor1 = TrackSensor(15)
 sensor2 = TrackSensor(14)
+speed = 30
 
 def forward(motor1, motor2, speed):
     motor1.Forward(speed)
