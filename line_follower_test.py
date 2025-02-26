@@ -13,12 +13,12 @@ class Motor:
     self.pwm1.duty_u16(0)
 
  def Forward(self, speed):
-    self.m1Dir.value(0) # forward = 0 reverse = 1 motor 1
+    self.m1Dir.value(1) # forward = 1 reverse = 0 motor 1
     #self.pwm1.duty_u16(int(65535*100/100)) # speed range 0-100 motor 1
     self.pwm1.duty_u16(int(65535*speed/100)) # speed range 0-100 motor 1
 
  def Reverse(self, speed):
-    self.m1Dir.value(1)
+    self.m1Dir.value(0)
     #self.pwm1.duty_u16(int(65535*30/100))
     self.pwm1.duty_u16(int(65535*speed/100))
 
@@ -39,12 +39,20 @@ def reverse(speed):
     motor1.Reverse(speed)
     motor2.Reverse(speed)
 
-def rightTurn(f, speed):
+def leftTurn(f, speed):
     motor1.Forward(speed)
     motor2.Forward(f*speed)
 
-def leftTurn(f, speed):
+def rightTurn(f, speed):
     motor1.Forward(f*speed)
+    motor2.Forward(speed)
+
+def leftPivot(f,speed):
+    motor1.Forward(speed)
+    motor2.Reverse(f*speed)
+
+def rightPivot(f, speed):
+    motor1.Reverse(f*speed)
     motor2.Forward(speed)
 
 def stop():
@@ -61,7 +69,7 @@ sensor_Tright = TrackSensor(12)
 speed1 = 75
 speed2 = 30
 f1 = 0.7 #good for small corrections when straight lining
-f2 = 0
+f2 = 0.5
 
 while True:
     right_val = sensor_right.reading()
@@ -83,8 +91,8 @@ while True:
         else:
             forward(speed2)
     elif ((Tright_val == 1) and (Tleft_val == 0)):
-        rightTurn(f2,speed2)
+        rightPivot(f2,speed2)
     elif ((Tright_val == 0) and (Tleft_val == 1)):
-        leftTurn(f2,speed2)
+        leftPivot(f2,speed2)
     else:
         stop()
