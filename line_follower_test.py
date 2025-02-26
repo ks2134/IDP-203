@@ -57,10 +57,11 @@ sensor_left = TrackSensor(15)
 sensor_right = TrackSensor(14)
 sensor_Tleft = TrackSensor(13)
 sensor_Tright = TrackSensor(12)
+#minimum speed for motors is 12
 speed1 = 75
 speed2 = 30
 f1 = 0.7 #good for small corrections when straight lining
-f2 = 0.3
+f2 = 0
 
 while True:
     right_val = sensor_right.reading()
@@ -80,6 +81,10 @@ while True:
         elif right_val==0 and left_val==1:
             leftTurn(f1,speed1) 
         else:
-            stop()
+            forward(speed2)
+    elif ((Tright_val == 1) and (Tleft_val == 0)):
+        rightTurn(f2,speed2)
+    elif ((Tright_val == 0) and (Tleft_val == 1)):
+        leftTurn(f2,speed2)
     else:
         stop()
