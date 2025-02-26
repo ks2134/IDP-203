@@ -72,13 +72,13 @@ while True:
     #left_val=left_ir.value() #Getting left IR value(0 or 1)
     # Controlling robot direction based on IR value
 
-    if (Tright_val and Tleft_val) == 0: #straight line
+    if ((Tright_val == 0) and (Tleft_val == 0)): #straight line
         if right_val==0 and left_val==0:
             forward(speed1)
         elif right_val==1 and left_val==0:
             rightTurn(f1,speed1)
         elif right_val==0 and left_val==1:
-            leftTurn(f1,speed1)
+            leftTurn(f1,speed1) 
         else:
             stop()
     else:
