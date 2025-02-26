@@ -67,7 +67,7 @@ sensor_Tleft = TrackSensor(13)
 sensor_Tright = TrackSensor(12)
 #minimum speed for motors is 12
 speed1 = 75
-speed2 = 30
+speed2 = 75
 f1 = 0.7 #good for small corrections when straight lining
 f2 = 0.5
 
@@ -91,8 +91,12 @@ while True:
         else:
             forward(speed2)
     elif ((Tright_val == 1) and (Tleft_val == 0)):
-        rightPivot(f2,speed2)
+        while (left_val = 0):
+            left_val = sensor_left.reading()
+            rightPivot(f2,speed2)
     elif ((Tright_val == 0) and (Tleft_val == 1)):
-        leftPivot(f2,speed2)
+        while (right_val = 0):
+            right_val = sensor_right.reading()
+            leftPivot(f2,speed2)
     else:
         stop()
