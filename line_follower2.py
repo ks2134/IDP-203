@@ -75,11 +75,9 @@ speed2 = 100
 f1 = 0.7 #good for small corrections when straight lining
 f2 = 0.5
 
-def go_forward(triggered):
+def go_forward():
     right_val = sensor_right.reading()
     left_val = sensor_left.reading()
-    #Tright_val = sensor_Tright.reading()
-    #Tleft_val = sensor_Tleft.reading()
 
     if right_val==0 and left_val==0:
         forward(speed1)
@@ -90,37 +88,26 @@ def go_forward(triggered):
     else:
         forward(speed1)
 
-def turn_right(triggered):
+def turn_right():
     left_val = sensor_left.reading()
-    Tleft_val = sensor_Tleft.reading()
+    right_val = sensor_right.reading()
     while (left_val == 0):
-        print("first loop")
         left_val = sensor_left.reading()
         rightPivot(f2,speed2)
-    while (triggered == 0):
-        print("second loop")
-        Tleft_val = sensor_Tleft.reading()
-        if (Tleft_val == 1):
-            triggered = 1
-        rightPivot(f2,speed2)
-    while (Tleft_val == 1):
-        print("third loop")
-        Tleft_val = sensor_Tleft.reading()
+    while ((left_val == 1) or (right_val == 1)):
+        left_val = sensor_left.reading()
+        right_val = sensor_right.reading()
         rightPivot(f2,speed2)
 
-def turn_left(triggered): #if t junction triggered is 0, else is 1
-    Tright_val = sensor_Tright.reading()
+def turn_left(): 
+    left_val = sensor_left.reading()
     right_val = sensor_right.reading()
     while (right_val == 0):
         right_val = sensor_right.reading()
         leftPivot(f2,speed2)
-    while (triggered == 0):
-        Tright_val = sensor_Tright.reading()
-        if (Tright_val == 1):
-            triggered = 1
-        leftPivot(f2,speed2)
-    while (Tright_val == 1):
-        Tright_val = sensor_Tright.reading()
+    while ((left_val == 1) or (right_val == 1)):
+        left_val = sensor_left.reading()
+        right_val = sensor_right.reading()
         leftPivot(f2,speed2)
 
 def detect_node(next_node):
@@ -148,19 +135,13 @@ cur = -1
 
 while cur < 5:
     next_node = test_route[cur + 1]
-    next_node_type = node_route_type[node_route[cur + 1]]
-    if next_node_type == "T":
-        triggered = 0
-    else:
-        triggered = 1
-    print("triggered",triggered)
+    #next_node_type = node_route_type[node_route[cur + 1]]
     node = detect_node(next_node)
     if node == False:
-        go_forward(triggered)
+        go_forward()
     else:
-        while (node == True):
-            node = detect_node(next_node)
-            my_functions[test_route[cur + 1]](triggered)
+        node = detect_node(next_node)
+        my_functions[next_node]()
         cur += 1
 
 stop()
