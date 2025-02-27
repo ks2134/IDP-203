@@ -1,12 +1,9 @@
 from machine import Pin, PWM
 from time import sleep
-<<<<<<< HEAD
-=======
 
 LED_pin = Pin(11 , Pin.OUT)
 LED_pin.value(1)
 
->>>>>>> refs/remotes/origin/main
 class Motor:
  def __init__(self, pin1, pin2):
     #self.m1Dir = Pin(7 , Pin.OUT) # set motor direction
@@ -78,36 +75,52 @@ speed2 = 100
 f1 = 0.7 #good for small corrections when straight lining
 f2 = 0.5
 
-while True:
+def go_forward():
     right_val = sensor_right.reading()
     left_val = sensor_left.reading()
     Tright_val = sensor_Tright.reading()
     Tleft_val = sensor_Tleft.reading()
-    
-    #right_val=right_ir.value() #Getting right IR value(0 or 1)
-    #left_val=left_ir.value() #Getting left IR value(0 or 1)
-    # Controlling robot direction based on IR value
 
-    if ((Tright_val == 0) and (Tleft_val == 0)): #straight line
-        if right_val==0 and left_val==0:
-            forward(speed1)
-        elif right_val==1 and left_val==0:
-            rightTurn(f1,speed1)
-        elif right_val==0 and left_val==1:
-            leftTurn(f1,speed1) 
-        else:
-            forward(speed2)
-    elif ((Tright_val == 1) and (Tleft_val == 0)):
-        while (left_val == 0):
-            left_val = sensor_left.reading()
-            rightPivot(f2,speed2)
-        while (Tleft == 1):
-            rightPivot(f2,speed2)
-    elif ((Tright_val == 0) and (Tleft_val == 1)):
-        while (right_val == 0):
-            right_val = sensor_right.reading()
-            leftPivot(f2,speed2)
-        while (Tright == 1):
-            leftPivot(f2,speed2)
+    if right_val==0 and left_val==0:
+        forward(speed1)
+    elif right_val==1 and left_val==0:
+        rightTurn(f1,speed1)
+    elif right_val==0 and left_val==1:
+        leftTurn(f1,speed1) 
     else:
-        stop()
+        forward(speed1)
+
+def turn_right():
+    while (left_val == 0):
+        left_val = sensor_left.reading()
+        rightPivot(f2,speed2)
+    while (Tleft == 1):
+        rightPivot(f2,speed2)
+
+def turn_left():
+    while (right_val == 0):
+        right_val = sensor_right.reading()
+        leftPivot(f2,speed2)
+    while (Tright == 1):
+        leftPivot(f2,speed2)
+
+def detect_node():
+    Tright_val = sensor_Tright.reading()
+    Tleft_val = sensor_Tleft.reading()
+    if (Tright_val == 1) or (Tleft_val == 1):
+        return True
+    else:
+        return False
+
+my_functions = {"L":turn_left, "R":turn_right, "0":go_forward}
+test_route = ["0","L","0","R","R","L","0","L","L", "L","L","0","R","0","R","0","R","0"]
+cur = -1
+
+while cur < 18:
+    if detect_node == False:
+        go_forward()
+    else:
+        cur += 1
+        my_functions[test_route[cur]]()
+
+stop()
