@@ -1,12 +1,10 @@
 from machine import Pin, PWM
 from time import sleep
-<<<<<<< HEAD
-=======
+
 
 LED_pin = Pin(11 , Pin.OUT)
 LED_pin.value(1)
 
->>>>>>> refs/remotes/origin/main
 class Motor:
  def __init__(self, pin1, pin2):
     #self.m1Dir = Pin(7 , Pin.OUT) # set motor direction
