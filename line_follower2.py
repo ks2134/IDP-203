@@ -91,10 +91,10 @@ def go_forward():
 def turn_right():
     left_val = sensor_left.reading()
     right_val = sensor_right.reading()
-    while (left_val == 0):
-        left_val = sensor_left.reading()
-        rightPivot(f2,speed2)
+    rightPivot(f2,speed2)
+    sleep(0.2)
     while ((left_val == 1) or (right_val == 1)):
+        print("turning right")
         left_val = sensor_left.reading()
         right_val = sensor_right.reading()
         rightPivot(f2,speed2)
@@ -102,31 +102,34 @@ def turn_right():
 def turn_left(): 
     left_val = sensor_left.reading()
     right_val = sensor_right.reading()
-    while (right_val == 0):
-        right_val = sensor_right.reading()
-        leftPivot(f2,speed2)
+    leftPivot(f2,speed2)
+    sleep(0.2)
     while ((left_val == 1) or (right_val == 1)):
         left_val = sensor_left.reading()
         right_val = sensor_right.reading()
         leftPivot(f2,speed2)
 
+def ignore():
+    Tleft_val = sensor_Tleft.reading()
+    Tright_val = sensor_Tright.reading()
+    while ((Tleft_val == 1) or (Tright_val == 1)):
+        Tleft_val = sensor_Tleft.reading()
+        Tright_val = sensor_Tright.reading()
+        go_forward()
+
 def detect_node(next_node):
-    Tright_val = None
-    Tleft_val = None
     if next_node == "L":
         Tleft_val = sensor_Tleft.reading()
+        return (Tleft_val == 1)
     elif next_node == "R":
         Tright_val = sensor_Tright.reading()
+        return (Tright_val == 1)
     else:
         Tright_val = sensor_Tright.reading()
         Tleft_val = sensor_Tleft.reading()
-    
-    if (Tright_val == 1) or (Tleft_val == 1):
-        return True
-    else:
-        return False
+        return ((Tright_val == 1) or (Tleft_val == 1))
 
-my_functions = {"L":turn_left, "R":turn_right, "0":go_forward}
+my_functions = {"L":turn_left, "R":turn_right, "0":ignore}
 test_route = ["R","0","R","R", "R"]
 node_route = [7,8,9,5,6]
 #indices represent node index
@@ -139,10 +142,10 @@ while cur < 5:
     node = detect_node(next_node)
     if node == False:
         go_forward()
-    else:
-        node = detect_node(next_node)
+    elif node == True:
         my_functions[next_node]()
         cur += 1
 
 stop()
+
 
