@@ -129,7 +129,7 @@ sensor_Tleft = TrackSensor(13)
 sensor_Tright = TrackSensor(12)
 #minimum speed for motors is 12
 speed1 = 90
-speed2 = 100
+speed2 = 85
 
 
 def go_forward():
@@ -160,9 +160,6 @@ def turn_Cright(): #corner
     while (left_val ==0):
         left_val = sensor_left.reading()
         rightPivot(f2,speed2)
-    while ((left_val == 1) or (right_val == 1)):
-        left_val = sensor_left.reading()
-        right_val = sensor_right.reading()
 
 def turn_right():
     Tleft_val = sensor_Tleft.reading()
@@ -177,9 +174,6 @@ def turn_right():
     while (left_val == 0):
         left_val = sensor_left.reading()
         rightPivot(f2, speed2)
-    while ((left_val == 1) or (right_val == 1)):
-        left_val = sensor_left.reading()
-        right_val = sensor_right.reading()
 
 def turn_Tright():
     left_val = sensor_left.reading()
@@ -190,10 +184,6 @@ def turn_Tright():
     while (left_val ==0):
         left_val = sensor_left.reading()
         rightPivot(f2,speed2)
-    while ((left_val == 1) or (right_val == 1)):
-        left_val = sensor_left.reading()
-        right_val = sensor_right.reading()
-    
 
 def turn_Cleft(): #corner
     right_val = sensor_right.reading()
@@ -201,10 +191,6 @@ def turn_Cleft(): #corner
     while (right_val == 0):
         right_val = sensor_right.reading()
         leftPivot(f2,speed2)
-    while ((left_val == 1) or (right_val == 1)):
-        left_val = sensor_left.reading()
-        right_val = sensor_right.reading()
-    
 
 def turn_left(): 
     Tright_val = sensor_Tright.reading()
@@ -219,9 +205,6 @@ def turn_left():
     while (right_val == 0):
         right_val = sensor_right.reading()
         leftPivot(f2, speed2)
-    while ((left_val == 1) or (right_val == 1)):
-        left_val = sensor_left.reading()
-        right_val = sensor_right.reading()
 
 def turn_Tleft(): 
     right_val = sensor_right.reading()
@@ -232,9 +215,6 @@ def turn_Tleft():
     while (right_val ==0):
         right_val = sensor_right.reading()
         leftPivot(f2,speed2)
-    while ((left_val == 1) or (right_val == 1)):
-        left_val = sensor_left.reading()
-        right_val = sensor_right.reading()
 
 def ignore():
     Tleft_val = sensor_Tleft.reading()
@@ -258,9 +238,9 @@ def detect_node(next_node):
     return ((Tright_val == 1) or (Tleft_val == 1))
 
 my_functions = {"L":turn_left, "R":turn_right, "S":ignore, "CR":turn_Cright, "CL":turn_Cleft,"TR":turn_Tright,"TL":turn_Tleft}
-test_route = [ "CL", "S", "L", "S", "TL", "S", "TL"]
+test_route = [ "TR", "S", "CR", "S", "S", "CR", "S", "R", "S", "S"]
 #S for straight, CR CL for corners, TL TR for head on t, L and R for side ts
-node_route = [11, 10, 7, 8, 9, 13, 12]
+node_route = [3, 5, 6, 7, 10, 11, 12, 14, 1, 2]
 #indices represent node index
 node_route_type = ["T", "T", "T", "T", "T", "T", "C", "T", "T", "T", "T", "C", "T", "T", "T", "T", "P", "P", "P", "P"] #T for t junction, c for corner, p for plus
 cur = -1
