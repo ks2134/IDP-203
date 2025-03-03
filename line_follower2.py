@@ -78,8 +78,6 @@ f2 = 0.5
 def go_forward():
     right_val = sensor_right.reading()
     left_val = sensor_left.reading()
-    Tright_val = sensor_Tright.reading()
-    Tleft_val = sensor_Tleft.reading()
 
     if right_val==0 and left_val==0:
         forward(speed1)
@@ -90,37 +88,100 @@ def go_forward():
     else:
         forward(speed1)
 
-def turn_right():
-    while (left_val == 0):
+def turn_Cright(): #corner
+    left_val = sensor_left.reading()
+    while (left_val ==0):
         left_val = sensor_left.reading()
         rightPivot(f2,speed2)
-    while (Tleft == 1):
-        rightPivot(f2,speed2)
 
-def turn_left():
+def turn_right():
+    Tleft_val = sensor_Tleft.reading()
+    left_val = sensor_left.reading()
+    while (Tleft_val == 0):
+        Tleft_val = sensor_Tleft.reading()
+        rightPivot(f2, speed2)
+    while (Tleft_val == 1):
+        Tleft_val = sensor_Tleft.reading()
+        rightPivot(f2, speed2)
+    while (left_val == 0):
+        left_val = sensor_left.reading()
+        rightPivot(f2, speed2)
+
+def turn_Tright():
+    left_val = sensor_left.reading()
+    while (left_val ==1):
+        left_val = sensor_left.reading()
+        rightPivot(f2,speed2)
+    while (left_val ==0):
+        left_val = sensor_left.reading()
+        rightPivot(f2,speed2)
+    
+
+def turn_Cleft(): #corner
+    right_val = sensor_right.reading()
     while (right_val == 0):
         right_val = sensor_right.reading()
         leftPivot(f2,speed2)
-    while (Tright == 1):
+
+def turn_left(): 
+    Tright_val = sensor_Tright.reading()
+    right_val = sensor_right.reading()
+    while (Tright_val == 0):
+        Tright_val = sensor_Tright.reading()
+        leftPivot(f2, speed2)
+    while (Tright_val == 1):
+        Tright_val = sensor_Tright.reading()
+        leftPivot(f2, speed2)
+    while (right_val == 0):
+        right_val = sensor_left.reading()
+        leftPivot(f2, speed2)
+
+def turn_Tleft(): 
+    right_val = sensor_right.reading()
+    while (right_val ==1):
+        right_val = sensor_left.reading()
+        leftPivot(f2,speed2)
+    while (right_val ==0):
+        right_val = sensor_left.reading()
         leftPivot(f2,speed2)
 
-def detect_node():
-    Tright_val = sensor_Tright.reading()
+def ignore():
     Tleft_val = sensor_Tleft.reading()
-    if (Tright_val == 1) or (Tleft_val == 1):
-        return True
-    else:
-        return False
+    Tright_val = sensor_Tright.reading()
+    while ((Tleft_val == 1) or (Tright_val == 1)):
+        Tleft_val = sensor_Tleft.reading()
+        Tright_val = sensor_Tright.reading()
+        go_forward()
 
-my_functions = {"L":turn_left, "R":turn_right, "0":go_forward}
-test_route = ["0","L","0","R","R","L","0","L","L", "L","L","0","R","0","R","0","R","0"]
+def detect_node(next_node):
+    if next_node == "L":
+        Tleft_val = sensor_Tleft.reading()
+        return (Tleft_val == 1)
+    elif next_node == "R":
+        Tright_val = sensor_Tright.reading()
+        return (Tright_val == 1)
+    else:
+        Tright_val = sensor_Tright.reading()
+        Tleft_val = sensor_Tleft.reading()
+        return ((Tright_val == 1) or (Tleft_val == 1))
+
+my_functions = {"L":turn_left, "R":turn_right, "S":ignore, "CR":turn_Cright, "CL":turn_Cleft,"TR":turn_Tright,"TL":turn_Tleft}
+test_route = ["TR", "S", "CR","S", "S", "CR", "S", "R", "S", "S"]
+#S for straight, CR CL for corners, TL TR for head on t, L and R for side ts
+node_route = [3,5,6,7,10,11,12,14,1,2]
+#indices represent node index
+node_route_type = ["T", "T", "T", "T", "T", "T", "C", "T", "T", "T", "T", "C", "T", "T", "T", "T", "P", "P", "P", "P"] #T for t junction, c for corner, p for plus
 cur = -1
 
-while cur < 18:
-    if detect_node == False:
+while cur < (len(node_route) -1):
+    next_node = test_route[cur + 1]
+    node = detect_node(next_node)
+    if node == False:
         go_forward()
-    else:
+    elif node == True:
+        my_functions[next_node]()
         cur += 1
-        my_functions[test_route[cur]]()
 
 stop()
+
+
