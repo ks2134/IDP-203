@@ -156,13 +156,18 @@ def go_forward():
 
 def turn_Cright(): #corner
     left_val = sensor_left.reading()
+    right_val = sensor_right.reading()
     while (left_val ==0):
         left_val = sensor_left.reading()
         rightPivot(f2,speed2)
+    while ((left_val == 1) or (right_val == 1)):
+        left_val = sensor_left.reading()
+        right_val = sensor_right.reading()
 
 def turn_right():
     Tleft_val = sensor_Tleft.reading()
     left_val = sensor_left.reading()
+    right_val = sensor_right.reading()
     while (Tleft_val == 0):
         Tleft_val = sensor_Tleft.reading()
         rightPivot(f2, speed2)
@@ -172,26 +177,39 @@ def turn_right():
     while (left_val == 0):
         left_val = sensor_left.reading()
         rightPivot(f2, speed2)
+    while ((left_val == 1) or (right_val == 1)):
+        left_val = sensor_left.reading()
+        right_val = sensor_right.reading()
 
 def turn_Tright():
     left_val = sensor_left.reading()
+    right_val = sensor_right.reading()
     while (left_val ==1):
         left_val = sensor_left.reading()
         rightPivot(f2,speed2)
     while (left_val ==0):
         left_val = sensor_left.reading()
         rightPivot(f2,speed2)
+    while ((left_val == 1) or (right_val == 1)):
+        left_val = sensor_left.reading()
+        right_val = sensor_right.reading()
     
 
 def turn_Cleft(): #corner
     right_val = sensor_right.reading()
+    left_val = sensor_left.reading()
     while (right_val == 0):
         right_val = sensor_right.reading()
         leftPivot(f2,speed2)
+    while ((left_val == 1) or (right_val == 1)):
+        left_val = sensor_left.reading()
+        right_val = sensor_right.reading()
+    
 
 def turn_left(): 
     Tright_val = sensor_Tright.reading()
     right_val = sensor_right.reading()
+    left_val = sensor_left.reading()
     while (Tright_val == 0):
         Tright_val = sensor_Tright.reading()
         leftPivot(f2, speed2)
@@ -201,15 +219,22 @@ def turn_left():
     while (right_val == 0):
         right_val = sensor_right.reading()
         leftPivot(f2, speed2)
+    while ((left_val == 1) or (right_val == 1)):
+        left_val = sensor_left.reading()
+        right_val = sensor_right.reading()
 
 def turn_Tleft(): 
     right_val = sensor_right.reading()
+    left_val = sensor_left.reading()
     while (right_val ==1):
         right_val = sensor_right.reading()
         leftPivot(f2,speed2)
     while (right_val ==0):
         right_val = sensor_right.reading()
         leftPivot(f2,speed2)
+    while ((left_val == 1) or (right_val == 1)):
+        left_val = sensor_left.reading()
+        right_val = sensor_right.reading()
 
 def ignore():
     Tleft_val = sensor_Tleft.reading()
