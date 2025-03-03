@@ -128,7 +128,7 @@ sensor_right = TrackSensor(14)
 sensor_Tleft = TrackSensor(13)
 sensor_Tright = TrackSensor(12)
 #minimum speed for motors is 12
-speed1 = 100
+speed1 = 90
 speed2 = 100
 
 
