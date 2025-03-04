@@ -224,7 +224,7 @@ def ignore():
         Tright_val = sensor_Tright.reading()
         go_forward()
 
-def detect_node(next_node):
+def detect_node():
     # if next_node == "L":
     #     Tleft_val = sensor_Tleft.reading()
     #     return (Tleft_val == 1)
@@ -247,7 +247,7 @@ cur = -1
 
 while cur < (len(node_route) -1):
     next_node = test_route[cur + 1]
-    node = detect_node(next_node)
+    node = detect_node()
     if node == False:
         go_forward()
     elif node == True:
