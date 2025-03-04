@@ -8,6 +8,7 @@ F1_ORIGINAL = 0.7
 
 f1 = F1_ORIGINAL #good for small corrections when straight lining
 f2 = 0.5
+f3 = 1
 
 line_correction = 0.2
 
@@ -128,8 +129,9 @@ sensor_right = TrackSensor(14)
 sensor_Tleft = TrackSensor(13)
 sensor_Tright = TrackSensor(12)
 #minimum speed for motors is 12
-speed1 = 90
-speed2 = 85
+speed1 = 100
+speed2 = 100
+speed3 = 100
 
 
 def go_forward():
@@ -263,17 +265,21 @@ def reverse_right():
 def spin_left():
     right_val = sensor_right.reading()
     while (right_val == 1):
-        leftPivot(f2,speed2)
+        right_val = sensor_right.reading()
+        leftPivot(f3,speed3)
     while (right_val == 0):
-        leftPivot(f2,speed2)
+        right_val = sensor_right.reading()
+        leftPivot(f3,speed3)
 
 
 def spin_right():
     left_val = sensor_left.reading()
     while (left_val == 1):
-        rightPivot(f2,speed2)
+        left_val = sensor_left.reading()
+        rightPivot(f3,speed3)
     while (left_val == 0):
-        rightPivot(f2,speed2)
+        left_val = sensor_left.reading()
+        rightPivot(f3,speed3)
 
 def detect_node():
     Tleft_val = sensor_Tleft.reading()
@@ -281,9 +287,9 @@ def detect_node():
     return ((Tright_val == 1) or (Tleft_val == 1))
 
 my_functions = {"L":turn_left, "R":turn_right, "S":ignore, "CR":turn_Cright, "CL":turn_Cleft,"TR":turn_Tright,"TL":turn_Tleft, "RR":reverse_right, "RL":reverse_left, "SR":spin_right, "SL":spin_left}
-test_route = [ "RR"]
+test_route = ["CR","R", "R"]
 #S for straight, CR CL for corners, TL TR for head on t, L and R for side ts
-node_route = [10]
+node_route = [6,7,8]
 #indices represent node index
 node_route_type = ["T", "T", "T", "T", "T", "T", "C", "T", "T", "T", "T", "C", "T", "T", "T", "T", "P", "P", "P", "P"] #T for t junction, c for corner, p for plus
 cur = -1
@@ -294,7 +300,7 @@ while cur < (len(node_route) -1):
     next_node = test_route[cur + 1]
     node = detect_node()
     print(node)
-    if ((next_node == "RR") or (next_node == "RL") or (next_node == "SR") or (next_node == "SL")):
+    if ((next_node == "RR") or (next_node == "RL")):
         cur_dir = 1
     else:
         cur_dir = 0
