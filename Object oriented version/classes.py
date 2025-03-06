@@ -1,4 +1,5 @@
 from machine import Pin, PWM
+from time import sleep
 
 #Driving motor on robot. Inputs: pin1 = motor direction, pin2 = pwm pin
 class Motor:
@@ -52,17 +53,14 @@ class Vehicle:
       self.right_motor_speed = 0.97 * speed
       
 
-   def forward(self, previous_state, state_counter):
+   def forward(self, previous_state=[0, 0], state_counter=0):
       
       if previous_state != [0, 0]:
          state_counter = 0
          
-         self.left_motor.Forward(self.left_motor_speed)
-         self.right_motor.Forward(self.right_motor_speed)
+      self.left_motor.Forward(self.left_motor_speed)
+      self.right_motor.Forward(self.right_motor_speed)
       
-      else:
-         self.left_motor.Forward(self.left_motor_speed)
-         self.right_motor.Forward(self.right_motor_speed)
       
       return state_counter
       
@@ -125,7 +123,7 @@ class Vehicle:
       self.left_motor.off()
                
    
-   #Normal forward driving on line
+   #Normal forward driving on line following
    def go_forward(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
       right_val = self.sensor_right.reading()
       left_val = self.sensor_left.reading()
@@ -254,6 +252,121 @@ class Vehicle:
          Tright_val = self.sensor_Tright.reading()
 
          self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
+
+   #Go back and drive off left
+   def reverse_left(self, f):
+      right_val = self.sensor_right.reading()
+
+      while (right_val == 0):
+         right_val = self.sensor_right.reading()
+         self.leftPivot(f)
+
+      while (right_val == 1):
+         right_val = self.sensor_right.reading()
+         self.leftPivot(f)
+
+      while (right_val == 0):
+         right_val = self.sensor_right.reading()
+         self.leftPivot(f)
+
+   #Go back and drive off right
+   def reverse_right(self, f):
+      left_val = self.sensor_left.reading()
+
+      while (left_val == 0):
+         left_val = self.sensor_left.reading()
+         self.rightPivot(f)
+
+      while (left_val == 1):
+         left_val = self.sensor_left.reading()
+         self.rightPivot(f)
+
+      while (left_val == 0):
+         left_val = self.sensor_left.reading()
+         self.rightPivot(f)
+
+   #After dropping off the box, perform 180 degree turn to the left.
+   def spin_left(self, f):
+      state_counter = self.forward()
+      sleep(0.5)
+
+      self.reverse()
+      sleep(0.5)
+
+      right_val = self.sensor_right.reading()
+
+      while (right_val == 1):
+         right_val = self.sensor_right.reading()
+         self.leftPivot(f)
+
+      while (right_val == 0):
+         right_val = self.sensor_right.reading()
+         self.leftPivot(f)
+
+   #After dropping off the box, perform 180 degree turn to the right.
+   def spin_right(self, f):
+      state_counter = self.forward()
+      sleep(0.5)
+
+      self.reverse()
+      sleep(0.5)
+
+      left_val = self.sensor_left.reading()
+
+      while (left_val == 1):
+         left_val = self.sensor_left.reading()
+         self.rightPivot(f)
+
+      while (left_val == 0):
+         left_val = self.sensor_left.reading()
+         self.rightPivot(f)
+
+   #Picking up the box. (Takes f just to keep loop general)
+   def box(self, f):
+      Tleft_val = self.sensor_Tleft.reading()
+      Tright_val = self.sensor_Tright.reading()
+
+      while ((Tleft_val == 1) or (Tright_val == 1)):
+         Tleft_val = self.sensor_Tleft.reading()
+         Tright_val = self.sensor_Tright.reading()
+
+         self.reverse()
+
+   #Starting position manoeuvring
+   def start(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
+      Tleft_val = self.sensor_Tleft.reading()
+      Tright_val = self.sensor_Tright.reading()
+
+      while ((Tleft_val == 0) or (Tright_val == 0)):
+         Tleft_val = self.sensor_Tleft.reading()
+         Tright_val = self.sensor_Tright.reading()
+         
+         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
+
+      while ((Tleft_val == 1) or (Tright_val == 1)):
+         Tleft_val = self.sensor_Tleft.reading()
+         Tright_val = self.sensor_Tright.reading()
+         
+         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
+
+      return previous_state, state_counter, current_f
+
+
+   #End up back in the box.
+   def finish(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
+      Tleft_val = self.sensor_Tleft.reading()
+      Tright_val = self.sensor_Tright.reading()
+
+      while ((Tleft_val == 1) or (Tright_val == 1)):
+         Tleft_val = self.sensor_Tleft.reading()
+         Tright_val = self.sensor_Tright.reading()
+         
+         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
+
+      dummy = self.forward()
+      sleep(0.5)
+
+      return previous_state, state_counter, current_f
 
    #Node detection function
    def detect_node(self):

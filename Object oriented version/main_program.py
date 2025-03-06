@@ -20,6 +20,7 @@ LED_PIN = 9
 
 F1_ORIGINAL = 0.7
 F2_ORIGINAL = 0.5
+F3_ORIGINAL = 1.0
 
 LINE_CORRECTION = 0.2
 STATE_COUNTER_TRIP = 500
@@ -40,22 +41,41 @@ current_f = F1_ORIGINAL
 
 
 
-node_types = {"L":robot.turn_left, "R":robot.turn_right, "S":robot.ignore, "CR":robot.turn_Cright, "CL":robot.turn_Cleft,"TR":robot.turn_Tright,"TL":robot.turn_Tleft}
+node_types = {"L":robot.turn_left, "R":robot.turn_right, "S":robot.ignore, "CR":robot.turn_Cright, "CL":robot.turn_Cleft,
+              "TR":robot.turn_Tright,"TL":robot.turn_Tleft, "RR":robot.reverse_right, "RL":robot.reverse_left, 
+              "SR":robot.spin_right, "SL":robot.spin_left, "B":robot.box,"FIN":robot.finish}
 
 #S for straight, CR CL for corners, TL TR for 'head on' t, L and R for side t
-test_route = ["S", "S", "TL", "S", "CL", "S", "S", "CL", "S", "L", "S"]
+test_route = ["TL","R", "B", "RL", "TL", "SL", "S", "R", "S", "R", "B", "RL", "TR", "S", "SR", "S", "S", "CL", "L", "B", "RR", "S", "CL", "S", "S", "SL", "S", "R", "L", "L", "B", "RR", "TR", "S", "CR", "S", "S","SR", "L", "L", "FIN"]
+
+robot.led.value(1)
 
 cur = -1
+directions = [robot.go_forward, robot.reverse]
+
+previous_state, state_counter, current_f = robot.start(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+
 while cur < (len(test_route) - 1):
     next_node = test_route[cur + 1]
     node = robot.detect_node()
 
+    if (next_node == "RR") or (next_node == "RL"):
+        cur_dir = 1 
+    else:
+        cur_dir = 0
+
     if node == False:
-        previous_state, state_counter, current_f = robot.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+        try:
+            previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+        except:
+            robot.reverse()
     
     elif node == True:
-        if test_route[cur + 1] == "S":
+        if (test_route[cur + 1] == "S") or (test_route[cur + 1] == "FIN"):
             previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+
+        elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
+            node_types[next_node](F3_ORIGINAL)
 
         else:
             node_types[next_node](F2_ORIGINAL)
