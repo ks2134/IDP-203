@@ -15,5 +15,9 @@ route_tree = [["TL", "R"], #0 start route to 16
               ["RL","CR","S","S"],#14 18 to G/B
               ["SL","R","S","R","FIN"],#15 Y/R to finish
               ["SR","L","L","FIN"]] #16 G/B to finish
-
-
+#box_num initially 0
+#inc 1 or 2 ......... 4*box_num + inc when delivering 4*box_num + 2*inc when collecting
+#4*box_num + 1 to go to Y/R
+#4*box_num + 2 to go to B/G
+#4*box_num + 3 to go from Y/R
+#4*box_num + 4 to go from B/G
