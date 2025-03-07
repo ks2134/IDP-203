@@ -1,5 +1,6 @@
-from machine import Pin, PWM
-from time import sleep
+from machine import Pin, PWM, I2C
+from time import sleep, sleep_ms
+from colour_sensor import TCS34725
 
 #Driving motor on robot. Inputs: pin1 = motor direction, pin2 = pwm pin
 class Motor:
@@ -34,7 +35,7 @@ class TrackSensor:
    
    
 class Vehicle:
-   def __init__(self, left_motor_dir, left_motor_pwm, right_motor_dir, right_motor_pwm, left_track, right_track, Tleft_track, Tright_track, led_pin, speed):
+   def __init__(self, left_motor_dir, left_motor_pwm, right_motor_dir, right_motor_pwm, left_track, right_track, Tleft_track, Tright_track, led_pin, speed, i2c_sda, i2c_scl):
       
       #Setting up driving motors
       self.left_motor = Motor(left_motor_dir, left_motor_pwm)
@@ -45,6 +46,10 @@ class Vehicle:
       self.sensor_right = TrackSensor(right_track)
       self.sensor_Tleft = TrackSensor(Tleft_track)
       self.sensor_Tright = TrackSensor(Tright_track)
+
+      #Setting up colour sensor:
+      self.i2c_bus = I2C(0, sda=i2c_sda, scl=i2c_scl)
+      self.colour_sensor = TCS34725(self.i2c_bus)
 
       #Setting up miscellaneous peripheries
       self.led = Pin(led_pin, Pin.OUT)
@@ -374,3 +379,7 @@ class Vehicle:
       Tright_val = self.sensor_Tright.reading()
       
       return ((Tright_val == 1) or (Tleft_val == 1))
+   
+   #Colour sensor function
+   def sense_colour(self):
+      
