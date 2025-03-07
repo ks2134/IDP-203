@@ -389,5 +389,4 @@ class Vehicle:
       return ((Tright_val == 1) or (Tleft_val == 1))
    
    #Colour sensor function
-   def sense_colour(self):
-      
+#   def sense_colour(self):
