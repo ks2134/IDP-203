@@ -336,6 +336,14 @@ class Vehicle:
          Tright_val = self.sensor_Tright.reading()
 
          self.reverse()
+   
+   def test_box(self):
+      #get colour from colour sensor
+      #if colour is yellow or red
+      #RGB_inc = 1
+      #if colour is blue or green
+      RGB_inc = 2
+      return RGB_inc
 
    #Starting position manoeuvring
    def start(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
