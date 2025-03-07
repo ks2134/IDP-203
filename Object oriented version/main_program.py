@@ -1,5 +1,6 @@
 from time import sleep
 from classes import *
+from route_tree import *
 
 #Constants and definitions:
 LEFT_MOTOR_DIR_PIN = 7
@@ -46,41 +47,52 @@ node_types = {"L":robot.turn_left, "R":robot.turn_right, "S":robot.ignore, "CR":
               "SR":robot.spin_right, "SL":robot.spin_left, "B":robot.box,"FIN":robot.finish}
 
 #S for straight, CR CL for corners, TL TR for 'head on' t, L and R for side t
-test_route = ["TL","R", "B", "RL", "TL", "SL", "S", "R", "S", "R", "B", "RL", "TR", "S", "SR", "S", "S", "CL", "L", "B", "RR", "S", "CL", "S", "S", "SL", "S", "R", "L", "L", "B", "RR", "TR", "S", "CR", "S", "S","SR", "L", "L", "FIN"]
+test_route = tree[0]
+box_num = 0 #represents number of delivered boxes - 1
+box_inc = 0 #0 for collecting, 1 for delivering
+RGB_inc = 1 #1 for YR, 2 for GB
 
 robot.led.value(1)
-
-cur = -1
 directions = [robot.go_forward, robot.reverse]
 
 previous_state, state_counter, current_f = robot.start(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+while (box_num < 5):
+    cur = -1
+    while cur < (len(test_route) - 1):
+        next_node = test_route[cur + 1]
+        node = robot.detect_node()
 
-while cur < (len(test_route) - 1):
-    next_node = test_route[cur + 1]
-    node = robot.detect_node()
-
-    if (next_node == "RR") or (next_node == "RL"):
-        cur_dir = 1 
-    else:
-        cur_dir = 0
-
-    if node == False:
-        try:
-            previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
-        except:
-            robot.reverse()
-    
-    elif node == True:
-        if (test_route[cur + 1] == "S") or (test_route[cur + 1] == "FIN"):
-            previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
-
-        elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
-            node_types[next_node](F3_ORIGINAL)
-
+        if (next_node == "RR") or (next_node == "RL"):
+            cur_dir = 1 
         else:
-            node_types[next_node](F2_ORIGINAL)
-        
-        cur += 1
+            cur_dir = 0
 
+        if node == False:
+            try:
+                previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+            except:
+                robot.reverse()
+        
+        elif node == True:
+            print(next_node)
+            if (test_route[cur + 1] == "S") or (test_route[cur + 1] == "FIN"):
+                previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+
+            elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
+                node_types[next_node](F3_ORIGINAL)
+
+            else:
+                node_types[next_node](F2_ORIGINAL)
+            
+            cur += 1
+    if (box_inc == 0): #delivering
+        if (box_num == 4):
+            break
+        RGB_inc = robot.test_box() #code for box pickup
+        test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
+    elif (box_inc == 1): #going to next collection
+        test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
+        box_num += 1
+    box_inc = abs(box_inc - 1)
 
 robot.stop()
