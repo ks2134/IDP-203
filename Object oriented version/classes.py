@@ -337,8 +337,22 @@ class Vehicle:
 
          self.reverse()
    
-   def get_box(self,f)
-   
+   def get_box(self,f):
+      passed_node = False
+      tof = VL53L0X(i2c)
+      Tleft_val = self.sensor_Tleft.reading()
+      Tright_val = self.sensor_Tright.reading()
+      # tof.set_Vcsel_pulse_period(tof.vcsel_period_type[0], 18)
+      tof.set_Vcsel_pulse_period(tof.vcsel_period_type[0], 12)
+      # tof.set_Vcsel_pulse_period(tof.vcsel_period_type[1], 14)
+      tof.set_Vcsel_pulse_period(tof.vcsel_period_type[1], 8)
+      while((tof.ping()-50) > 10):
+         Tleft_val = self.sensor_Tleft.reading()
+         Tright_val = self.sensor_Tright.reading()
+         if ((Tleft_val == 1) or (Tright_val == 1)):
+            passed_node = True
+      servo.duty_u16(end_duty) 
+         
    def get_colour(self): #under construction
       colour = tcs.read('rgb')
       if ((colour[1] == colour[2]) or ((colour[1] - 1) == colour[2]) or ((colour[1] + 1) == colour[2])): #green
