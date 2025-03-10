@@ -1,7 +1,6 @@
 from machine import Pin, PWM, I2C
 from time import sleep, sleep_ms
 from colour_sensor import TCS34725
-import random
 
 #Driving motor on robot. Inputs: pin1 = motor direction, pin2 = pwm pin
 class Motor:
@@ -338,7 +337,9 @@ class Vehicle:
 
          self.reverse()
    
-   def test_box(self): #under construction
+   def get_box(self,f)
+   
+   def get_colour(self): #under construction
       colour = tcs.read('rgb')
       if ((colour[1] == colour[2]) or ((colour[1] - 1) == colour[2]) or ((colour[1] + 1) == colour[2])): #green
          RGB_inc = 2

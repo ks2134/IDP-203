@@ -6,7 +6,7 @@ servo = PWM(servo_pin)
 # Set Duty Cycle for Different Angles 
 max_duty = 7864 
 min_duty = 1802
-start_duty = 1500 #approx 90 degrees
+start_duty = 1500 #approx 10 degrees
 end_duty = 3300 # approx 0 degrees
 
 half_duty = int(max_duty/2) 

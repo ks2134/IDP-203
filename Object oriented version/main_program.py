@@ -28,6 +28,8 @@ STATE_COUNTER_TRIP = 500
 
 SPEED = 100
 
+SERVO_0 = 3300
+SERVO_10 = 1500
 
 robot = Vehicle(LEFT_MOTOR_DIR_PIN, LEFT_MOTOR_PWM_PIN, 
                 RIGHT_MOTOR_DIR_PIN, RIGHT_MOTOR_PWM_PIN, 
@@ -86,11 +88,13 @@ while (box_num < 5):
             
             cur += 1
     if (box_inc == 0): #delivering
+        #insert box pickup function
         if (box_num == 4):
             break
-        RGB_inc = robot.test_box() #code for box pickup
+        RGB_inc = robot.get_colour() #code for box pickup
         test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
     elif (box_inc == 1): #going to next collection
+        #insert box drop off function
         test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
         box_num += 1
     box_inc = abs(box_inc - 1)
