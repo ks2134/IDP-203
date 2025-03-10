@@ -35,7 +35,7 @@ I2C0_SCL = 17
 I2C0_BUS_NO = 0
 
 #Servo parameters
-SERVO_0 = 3300
+SERVO_0 = 2000
 SERVO_10 = 1500
 SERVO_PIN = 15
 
@@ -51,7 +51,7 @@ robot = Vehicle(LEFT_MOTOR_DIR_PIN, LEFT_MOTOR_PWM_PIN,
                 OUTER_LEFT_TRACK_SENSOR_PIN, OUTER_RIGHT_TRACK_SENSOR_PIN,
                 LED_PIN, SPEED, I2C0_SDA, I2C0_SCL, I2C0_BUS_NO,
                 SERVO_10, SERVO_0, SERVO_PIN,
-                I2C0_SDA, I2C1_SCL, I2C1_BUS_NO)
+                I2C1_SDA, I2C1_SCL, I2C1_BUS_NO)
 
 
 previous_state = [0, 0]
@@ -73,8 +73,8 @@ RGB_inc = 1 #1 for YR, 2 for GB
 robot.led.value(1)
 directions = [robot.go_forward, robot.reverse]
 
+robot.servo.duty_u16(SERVO_0)
 previous_state, state_counter, current_f = robot.start(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
-robot.servo(SERVO_0)
 while (box_num < 5):
     cur = -1
     while cur < (len(test_route) - 1):
@@ -86,7 +86,8 @@ while (box_num < 5):
         else:
             cur_dir = 0
         if (next_node == "B"):
-            while((robot.distance_sensor.ping()-50) > 60):
+            print(next_node)
+            while((robot.distance_sensor.ping()-50) > 30):
                 previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
                 cur += 1
         else:
@@ -111,7 +112,8 @@ while (box_num < 5):
     if (box_inc == 0): #delivering
         if (box_num == 4):
             break
-        RGB_inc = robot.get_box() #code for box pickup
+        RGB_inc = robot.get_box(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+        print(RGB_inc) 
         test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
     elif (box_inc == 1): #going to next collection
         #insert box drop off function

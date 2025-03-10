@@ -356,16 +356,18 @@ class Vehicle:
 
          self.reverse()
    
-   def get_box(self):
+   def get_box(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
       passed_node = False
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
-      while((self.distance_sensor.ping()-50) > 10):
+      while((self.distance_sensor.ping()-50) > 20):
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
+         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
          if ((Tleft_val == 1) or (Tright_val == 1)):
             passed_node = True
       self.servo.duty_u16(self.max_servo_pos) #picks up box
+      sleep(0.2)
       RGB_inc = self.get_colour() #scans box colour
       if (passed_node == True):
          Tleft_val = self.sensor_Tleft.reading()
@@ -382,6 +384,7 @@ class Vehicle:
          
    def get_colour(self): #under construction
       colour_sensor_reading = self.colour_sensor.read('rgb')
+      print(colour_sensor_reading)
       red, green, blue = colour_sensor_reading[0], colour_sensor_reading[1], colour_sensor_reading[2]
 
       only_colours = (red, green, blue)
