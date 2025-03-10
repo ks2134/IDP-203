@@ -71,30 +71,33 @@ while (box_num < 5):
             cur_dir = 1 
         else:
             cur_dir = 0
-
-        if node == False:
-            try:
+        if (next_node == "B"):
+            while((tof.ping()-50) > 60):
                 previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
-            except:
-                robot.reverse()
-        
-        elif node == True:
-            print(next_node)
-            if (test_route[cur + 1] == "S") or (test_route[cur + 1] == "FIN"):
-                previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
-
-            elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
-                node_types[next_node](F3_ORIGINAL)
-
-            else:
-                node_types[next_node](F2_ORIGINAL)
+                cur += 1
+        else:
+            if node == False:
+                try:
+                    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+                except:
+                    robot.reverse()
             
-            cur += 1
+            elif node == True:
+                print(next_node)
+                if (test_route[cur + 1] == "S") or (test_route[cur + 1] == "FIN"):
+                    previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+
+                elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
+                    node_types[next_node](F3_ORIGINAL)
+
+                else:
+                    node_types[next_node](F2_ORIGINAL)
+                
+                cur += 1
     if (box_inc == 0): #delivering
-        #insert box pickup function
         if (box_num == 4):
             break
-        RGB_inc = robot.get_colour() #code for box pickup
+        RGB_inc = robot.get_box() #code for box pickup
         test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
     elif (box_inc == 1): #going to next collection
         #insert box drop off function

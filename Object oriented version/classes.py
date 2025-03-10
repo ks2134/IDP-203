@@ -312,6 +312,7 @@ class Vehicle:
    def spin_right(self, f):
       state_counter = self.forward()
       sleep(0.5)
+      servo.duty_u16(SERVO_0) #drops box
 
       self.reverse()
       sleep(0.5)
@@ -337,7 +338,7 @@ class Vehicle:
 
          self.reverse()
    
-   def get_box(self,f):
+   def get_box(self,SERVO_0, SERVO_10):
       passed_node = False
       tof = VL53L0X(i2c)
       Tleft_val = self.sensor_Tleft.reading()
@@ -351,7 +352,20 @@ class Vehicle:
          Tright_val = self.sensor_Tright.reading()
          if ((Tleft_val == 1) or (Tright_val == 1)):
             passed_node = True
-      servo.duty_u16(end_duty) 
+      servo.duty_u16(SERVO_10) #picks up box
+      RGB_inc = self.get_colour() #scans box colour
+      if (passed_node == True):
+         Tleft_val = self.sensor_Tleft.reading()
+         Tright_val = self.sensor_Tright.reading()
+         while ((Tleft_val == 0) and (Tright_val == 0)):
+            Tleft_val = self.sensor_Tleft.reading()
+            Tright_val = self.sensor_Tright.reading()
+            self.reverse()
+         while ((Tleft_val == 1) and (Tright_val == 1)):
+            Tleft_val = self.sensor_Tleft.reading()
+            Tright_val = self.sensor_Tright.reading()
+            self.reverse()
+      return RGB_inc
          
    def get_colour(self): #under construction
       colour = self.colour_sensor.read('rgb')

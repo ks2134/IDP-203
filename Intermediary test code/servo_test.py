@@ -12,7 +12,7 @@ end_duty = 3300 # approx 0 degrees
 half_duty = int(max_duty/2) 
 #Set PWM frequency 
 frequency = 50 
-servo.freq (frequency) 
+servo.freq(frequency) 
 
 #Servo at 0 degrees 
 servo.duty_u16(start_duty) 
