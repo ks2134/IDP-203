@@ -85,7 +85,7 @@ while (box_num < 5):
         else:
             cur_dir = 0
         if (next_node == "B"):
-            while((tof.ping()-50) > 60):
+            while((robot.distance_sensor.ping()-50) > 60):
                 previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
                 cur += 1
         else:
