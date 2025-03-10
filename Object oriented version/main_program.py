@@ -74,6 +74,7 @@ robot.led.value(1)
 directions = [robot.go_forward, robot.reverse]
 
 previous_state, state_counter, current_f = robot.start(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+robot.servo(SERVO_0)
 while (box_num < 5):
     cur = -1
     while cur < (len(test_route) - 1):
