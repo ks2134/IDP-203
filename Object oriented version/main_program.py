@@ -26,19 +26,32 @@ F3_ORIGINAL = 1.0
 LINE_CORRECTION = 0.2
 STATE_COUNTER_TRIP = 500
 
+#Motor speed
 SPEED = 100
 
-I2C_SDA = 16
-I2C_SCL = 17
-I2C_BUS_NO = 0
+#Colour sensor I2C bus
+I2C0_SDA = 16
+I2C0_SCL = 17
+I2C0_BUS_NO = 0
+
+#Servo parameters
 SERVO_0 = 3300
 SERVO_10 = 1500
+SERVO_PIN = 15
+
+#Time of Flight sensor I2C bus
+I2C1_SDA = 18
+I2C1_SCL = 19
+I2C1_BUS_NO = 1
+
 
 robot = Vehicle(LEFT_MOTOR_DIR_PIN, LEFT_MOTOR_PWM_PIN, 
                 RIGHT_MOTOR_DIR_PIN, RIGHT_MOTOR_PWM_PIN, 
                 LEFT_TRACK_SENSOR_PIN, RIGHT_TRACK_SENSOR_PIN,
                 OUTER_LEFT_TRACK_SENSOR_PIN, OUTER_RIGHT_TRACK_SENSOR_PIN,
-                LED_PIN, SPEED, I2C_SDA, I2C_SCL, I2C_BUS_NO)
+                LED_PIN, SPEED, I2C0_SDA, I2C0_SCL, I2C0_BUS_NO,
+                SERVO_10, SERVO_0, SERVO_PIN,
+                I2C0_SDA, I2C1_SCL, I2C1_BUS_NO)
 
 
 previous_state = [0, 0]

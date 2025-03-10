@@ -1,6 +1,7 @@
 from machine import Pin, PWM, I2C
 from time import sleep, sleep_ms
 from colour_sensor import TCS34725
+from distance_sensor import VL53L0X
 
 #Driving motor on robot. Inputs: pin1 = motor direction, pin2 = pwm pin
 class Motor:
@@ -35,7 +36,10 @@ class TrackSensor:
    
    
 class Vehicle:
-   def __init__(self, left_motor_dir, left_motor_pwm, right_motor_dir, right_motor_pwm, left_track, right_track, Tleft_track, Tright_track, led_pin, speed, i2c_sda, i2c_scl, i2c_bus_no):
+   def __init__(self, left_motor_dir, left_motor_pwm, right_motor_dir, right_motor_pwm,
+                 left_track, right_track, Tleft_track, Tright_track, led_pin, speed, 
+                 i2c0_sda, i2c0_scl, i2c0_bus_no, max_servo_pos, min_servo_pos, servo_pin,
+                 i2c1_sda, i2c1_scl, i2c1_bus_no):
       
       #Setting up driving motors
       self.left_motor = Motor(left_motor_dir, left_motor_pwm)
@@ -48,14 +52,28 @@ class Vehicle:
       self.sensor_Tright = TrackSensor(Tright_track)
 
       #Setting up colour sensor:
-      self.i2c_bus = I2C(i2c_bus_no, sda=i2c_sda, scl=i2c_scl)
-      self.colour_sensor = TCS34725(self.i2c_bus)
+      self.i2c0_bus = I2C(i2c0_bus_no, sda=i2c0_sda, scl=i2c0_scl)
+      self.colour_sensor = TCS34725(self.i2c0_bus)
 
       #Setting up miscellaneous peripheries
       self.led = Pin(led_pin, Pin.OUT)
 
+      #Set slightly different motor speeds, in order to balance the two motors
       self.left_motor_speed = speed
       self.right_motor_speed = 0.97 * speed
+
+      #Initialise servo
+      self.max_servo_pos = max_servo_pos
+      self.min_servo_pos = min_servo_pos
+      self.servo = PWM(Pin(servo_pin))
+      self.servo.freq(50)        #PWM Frequency set at 50Hz
+
+      #Setting up distance sensor
+      self.i2c1_bus = I2C(i2c1_bus_no, sda=i2c1_sda, scl=i2c1_scl)
+      self.distance_sensor = VL53L0X(self.i2c1_bus)
+      self.distance_sensor.set_measurement_timing_budget(40000)
+      self.distance_sensor.set_Vcsel_pulse_period(self.distance_sensor.vcsel_period_type[0], 8)
+
       
 
    def forward(self, previous_state=[0, 0], state_counter=0):
@@ -341,17 +359,42 @@ class Vehicle:
       pass
    
    def get_colour(self): #under construction
-      colour = self.colour_sensor.read('rgb')
-      if ((colour[1] == colour[2]) or ((colour[1] - 1) == colour[2]) or ((colour[1] + 1) == colour[2])): #green
+      colour_sensor_reading = self.colour_sensor.read('rgb')
+      red, green, blue = colour_sensor_reading[0], colour_sensor_reading[1], colour_sensor_reading[2]
+
+      only_colours = (red, green, blue)
+      maximum_colour_reading = max(only_colours)
+
+      #colour_sensor_reading format: (r, g, b, c)
+      #Checking for green
+      if (green == blue) or (abs(green - blue) == 1):
          RGB_inc = 2
-      elif ((colour[2] >= colour[1]) and (colour[2] >= colour[0])): #blue
+      
+      #Checking for blue
+      elif maximum_colour_reading == blue:
          RGB_inc = 2
-      elif ((colour[1] >= colour[0]) and (colour[1] >= colour[2])): #yellow
+
+      #Checking for yellow
+      elif maximum_colour_reading == green:
          RGB_inc = 1
-      elif ((colour[0] >= colour[1]) and (colour[0] >= colour[2])): #red
+
+      #Checking for red
+      elif maximum_colour_reading == red:
          RGB_inc = 1
-      #RGB_inc = random.randint(1,2)
+
       return RGB_inc
+
+
+      # if ((colour_sensor_reading[1] == colour_sensor_reading[2]) or ((colour[1] - 1) == colour[2]) or ((colour[1] + 1) == colour[2])): #green
+      #    RGB_inc = 2
+      # elif ((colour[2] >= colour[1]) and (colour[2] >= colour[0])): #blue
+      #    RGB_inc = 2
+      # elif ((colour[1] >= colour[0]) and (colour[1] >= colour[2])): #yellow
+      #    RGB_inc = 1
+      # elif ((colour[0] >= colour[1]) and (colour[0] >= colour[2])): #red
+      #    RGB_inc = 1
+      # #RGB_inc = random.randint(1,2)
+      # return RGB_inc
 
    #Starting position manoeuvring
    def start(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
@@ -395,6 +438,3 @@ class Vehicle:
       Tright_val = self.sensor_Tright.reading()
       
       return ((Tright_val == 1) or (Tleft_val == 1))
-   
-#Colour sensor function
-#   def sense_colour(self):
