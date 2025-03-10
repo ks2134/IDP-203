@@ -35,7 +35,7 @@ class TrackSensor:
    
    
 class Vehicle:
-   def __init__(self, left_motor_dir, left_motor_pwm, right_motor_dir, right_motor_pwm, left_track, right_track, Tleft_track, Tright_track, led_pin, speed, i2c_sda, i2c_scl):
+   def __init__(self, left_motor_dir, left_motor_pwm, right_motor_dir, right_motor_pwm, left_track, right_track, Tleft_track, Tright_track, led_pin, speed, i2c_sda, i2c_scl, i2c_bus_no):
       
       #Setting up driving motors
       self.left_motor = Motor(left_motor_dir, left_motor_pwm)
@@ -48,7 +48,7 @@ class Vehicle:
       self.sensor_Tright = TrackSensor(Tright_track)
 
       #Setting up colour sensor:
-      self.i2c_bus = I2C(0, sda=i2c_sda, scl=i2c_scl)
+      self.i2c_bus = I2C(i2c_bus_no, sda=i2c_sda, scl=i2c_scl)
       self.colour_sensor = TCS34725(self.i2c_bus)
 
       #Setting up miscellaneous peripheries
@@ -354,7 +354,7 @@ class Vehicle:
       servo.duty_u16(end_duty) 
          
    def get_colour(self): #under construction
-      colour = tcs.read('rgb')
+      colour = self.colour_sensor.read('rgb')
       if ((colour[1] == colour[2]) or ((colour[1] - 1) == colour[2]) or ((colour[1] + 1) == colour[2])): #green
          RGB_inc = 2
       elif ((colour[2] >= colour[1]) and (colour[2] >= colour[0])): #blue
@@ -409,5 +409,5 @@ class Vehicle:
       
       return ((Tright_val == 1) or (Tleft_val == 1))
    
-   #Colour sensor function
+#Colour sensor function
 #   def sense_colour(self):
