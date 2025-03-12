@@ -1,4 +1,4 @@
-tree = [["TL", "R","B"], #0 start route to 16
+tree = [["TL", "BR","B"], #0 start route to 16
         ["RL", "TL"], #1 16 to Y/R
         ["RR","S","TR"], #2 16 to G/B
         ["SL","S","R", "S", "R","B"], #3 Y/R to 19
