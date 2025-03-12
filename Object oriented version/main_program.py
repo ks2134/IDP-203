@@ -24,10 +24,10 @@ F2_ORIGINAL = 0.5
 F3_ORIGINAL = 1.0
 
 LINE_CORRECTION = 0.2
-STATE_COUNTER_TRIP = 500
+STATE_COUNTER_TRIP = 500 
 
 #Motor speed
-SPEED = 100
+SPEED = 50
 
 #Colour sensor I2C bus
 I2C0_SDA = 16
@@ -35,8 +35,8 @@ I2C0_SCL = 17
 I2C0_BUS_NO = 0
 
 #Servo parameters
-SERVO_0 = 2000
-SERVO_10 = 1500
+SERVO_0 = 1900
+SERVO_10 = 1500 
 SERVO_PIN = 15
 
 #Time of Flight sensor I2C bus
@@ -66,6 +66,7 @@ node_types = {"L":robot.turn_left, "R":robot.turn_right, "S":robot.ignore, "CR":
 
 #S for straight, CR CL for corners, TL TR for 'head on' t, L and R for side t
 test_route = tree[0]
+#test_route = ["TR","TL","S","CL"]
 box_num = 0 #represents number of delivered boxes - 1
 box_inc = 0 #0 for collecting, 1 for delivering
 RGB_inc = 1 #1 for YR, 2 for GB
@@ -86,10 +87,10 @@ while (box_num < 5):
         else:
             cur_dir = 0
         if (next_node == "B"):
+            #while((robot.distance_sensor.ping()-50) > 30):
+            #    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
             print(next_node)
-            while((robot.distance_sensor.ping()-50) > 30):
-                previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
-                cur += 1
+            cur += 1
         else:
             if node == False:
                 try:
@@ -105,18 +106,20 @@ while (box_num < 5):
                 elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
                     node_types[next_node](F3_ORIGINAL)
 
+                elif ((test_route[cur + 2] == "B") and (cur < (len(test_route) - 1))):
+                    node_types[next_node](F3_ORIGINAL)
+
                 else:
                     node_types[next_node](F2_ORIGINAL)
                 
                 cur += 1
-    if (box_inc == 0): #delivering
+    if (box_inc == 0): #fetching box
         if (box_num == 4):
             break
         RGB_inc = robot.get_box(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
         print(RGB_inc) 
         test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
-    elif (box_inc == 1): #going to next collection
-        #insert box drop off function
+    elif (box_inc == 1): #dropping box or returning to home square
         test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
         box_num += 1
     box_inc = abs(box_inc - 1)
