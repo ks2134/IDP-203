@@ -36,7 +36,7 @@ I2C0_SCL = 17
 I2C0_BUS_NO = 0
 
 #Servo parameters
-SERVO_0 = 1900
+SERVO_0 = 1800
 SERVO_10 = 1500 
 SERVO_PIN = 15
 
@@ -63,7 +63,7 @@ current_f = F1_ORIGINAL
 
 node_types = {"L":robot.turn_left, "R":robot.turn_right, "S":robot.ignore, "CR":robot.turn_Cright, "CL":robot.turn_Cleft,
               "TR":robot.turn_Tright,"TL":robot.turn_Tleft, "RR":robot.reverse_right, "RL":robot.reverse_left, 
-              "SR":robot.spin_right, "SL":robot.spin_left, "B":robot.box,"FIN":robot.finish}
+              "SR":robot.spin_right, "SL":robot.spin_left, "B":robot.box,"FIN":robot.finish, "BR":robot.box_right}
 
 #S for straight, CR CL for corners, TL TR for 'head on' t, L and R for side t
 test_route = tree[0]
@@ -126,3 +126,4 @@ while (box_num < 5):
     box_inc = abs(box_inc - 1)
 
 robot.stop()
+

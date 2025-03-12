@@ -1,5 +1,5 @@
 from machine import Pin, PWM, I2C
-from time import sleep, sleep_ms
+from time import sleep, time
 from colour_sensor import TCS34725
 from distance_sensor import VL53L0X
 
@@ -76,13 +76,13 @@ class Vehicle:
 
       
 
-   def forward(self, previous_state=[0, 0], state_counter=0):
+   def forward(self, getting_box=1, previous_state=[0, 0], state_counter=0):
       
       if previous_state != [0, 0]:
          state_counter = 0
          
-      self.left_motor.Forward(self.left_motor_speed)
-      self.right_motor.Forward(self.right_motor_speed)
+      self.left_motor.Forward(self.left_motor_speed * getting_box)
+      self.right_motor.Forward(self.right_motor_speed * getting_box)
       
       
       return state_counter
@@ -93,7 +93,7 @@ class Vehicle:
       self.right_motor.Reverse(self.right_motor_speed)
 
 
-   def leftTurn(self, previous_state, state_counter, state_counter_trip, line_correction, F1_ORIGINAL, current_f):
+   def leftTurn(self, previous_state, state_counter, state_counter_trip, line_correction, F1_ORIGINAL, current_f, getting_box):
 
       if previous_state != [0, 1]:
          state_counter = 0
@@ -102,8 +102,8 @@ class Vehicle:
       elif previous_state == [0, 1]:
          state_counter += 1
             
-         self.right_motor.Forward(self.right_motor_speed)
-         self.left_motor.Forward(current_f * self.left_motor_speed)
+         self.right_motor.Forward((self.right_motor_speed) * getting_box)
+         self.left_motor.Forward(current_f * (self.left_motor_speed) * getting_box)
 
          if (state_counter >= state_counter_trip) and (current_f > 0.0):
             current_f -= line_correction
@@ -112,7 +112,7 @@ class Vehicle:
       return state_counter, current_f
 
 
-   def rightTurn(self, previous_state, state_counter, state_counter_trip, line_correction, F1_ORIGINAL, current_f):
+   def rightTurn(self, previous_state, state_counter, state_counter_trip, line_correction, F1_ORIGINAL, current_f, getting_box):
 
       if previous_state != [1, 0]:
          state_counter = 0
@@ -121,8 +121,8 @@ class Vehicle:
       elif previous_state == [1, 0]:
          state_counter += 1
 
-         self.right_motor.Forward(current_f * self.right_motor_speed)
-         self.left_motor.Forward(self.left_motor_speed)
+         self.right_motor.Forward(current_f * (self.right_motor_speed) * getting_box)
+         self.left_motor.Forward((self.left_motor_speed) * getting_box)
 
          if (state_counter >= state_counter_trip) and (current_f > 0.0):
             current_f -= line_correction
@@ -147,26 +147,26 @@ class Vehicle:
                
    
    #Normal forward driving on line following
-   def go_forward(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
+   def go_forward(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
       right_val = self.sensor_right.reading()
       left_val = self.sensor_left.reading()
 
       if right_val==0 and left_val==0:
-         state_counter = self.forward(previous_state, state_counter)
+         state_counter = self.forward(getting_box, previous_state, state_counter)
          previous_state = [0, 0]
 
       elif right_val==1 and left_val==0:
-         state_counter, current_f = self.rightTurn(previous_state, state_counter, state_counter_trip, line_correction, F1_ORIGINAL, current_f)
+         state_counter, current_f = self.rightTurn(previous_state, state_counter, state_counter_trip, line_correction, F1_ORIGINAL, current_f, getting_box)
 
          previous_state = [1, 0]
 
       elif right_val==0 and left_val==1:
-         state_counter, current_f = self.leftTurn(previous_state, state_counter, state_counter_trip, line_correction, F1_ORIGINAL, current_f)
+         state_counter, current_f = self.leftTurn(previous_state, state_counter, state_counter_trip, line_correction, F1_ORIGINAL, current_f, getting_box)
          previous_state = [0, 1]
 
       else:
          previous_state = [1, 1]
-         state_counter = self.forward(previous_state, state_counter)
+         state_counter = self.forward(getting_box, previous_state, state_counter)
 
       return previous_state, state_counter, current_f
 
@@ -266,7 +266,7 @@ class Vehicle:
          self.leftPivot(f)
 
    #Continuing straight and ignoring any alternate paths (S)
-   def ignore(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
+   def ignore(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
 
@@ -274,7 +274,7 @@ class Vehicle:
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
 
-         self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
+         self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
 
    #Go back and drive off left
    def reverse_left(self, f):
@@ -344,6 +344,12 @@ class Vehicle:
       while (left_val == 0):
          left_val = self.sensor_left.reading()
          self.rightPivot(f)
+   
+   def box_right(self,f):
+      self.forward()
+      sleep(0.2)
+      self.rightPivot(f)
+      sleep(1.1)
 
    #Picking up the box. (Takes f just to keep loop general)
    def box(self, f):
@@ -356,18 +362,25 @@ class Vehicle:
 
          self.reverse()
    
-   def get_box(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
+   def get_box(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
+      print("aha")
       passed_node = False
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
-      while((self.distance_sensor.ping()-50) > 20):
+      while(found_box == False):
+         #print(self.distance_sensor.ping()-50,"mm")
+         distance = self.distance_sensor.ping()-50
+         if (distance < 30):
+            found_box = True
+            sleep(1)
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
-         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
+         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
          if ((Tleft_val == 1) or (Tright_val == 1)):
             passed_node = True
       self.servo.duty_u16(self.max_servo_pos) #picks up box
-      sleep(0.2)
+      self.stop()
+      sleep(1)
       RGB_inc = self.get_colour() #scans box colour
       if (passed_node == True):
          Tleft_val = self.sensor_Tleft.reading()
@@ -392,7 +405,7 @@ class Vehicle:
 
       #colour_sensor_reading format: (r, g, b, c)
       #Checking for green
-      if (green == blue) or (abs(green - blue) == 1):
+      if (green == blue):
          RGB_inc = 2
       
       #Checking for blue
@@ -422,7 +435,7 @@ class Vehicle:
       # return RGB_inc
 
    #Starting position manoeuvring
-   def start(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
+   def start(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
 
@@ -430,19 +443,19 @@ class Vehicle:
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
          
-         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
+         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
 
       while ((Tleft_val == 1) or (Tright_val == 1)):
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
          
-         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
+         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
 
       return previous_state, state_counter, current_f
 
 
    #End up back in the box.
-   def finish(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip):
+   def finish(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
 
@@ -450,7 +463,7 @@ class Vehicle:
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
          
-         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip)
+         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
 
       dummy = self.forward()
       sleep(0.5)
