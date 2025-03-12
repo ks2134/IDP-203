@@ -7,7 +7,7 @@ LEFT_MOTOR_DIR_PIN = 7
 LEFT_MOTOR_PWM_PIN = 6
 
 LEFT_MOTOR_SPEED = 100
-RIGHT_MOTOR_SPEED = 97
+RIGHT_MOTOR_SPEED = 95
 
 RIGHT_MOTOR_DIR_PIN = 4
 RIGHT_MOTOR_PWM_PIN = 5
@@ -27,7 +27,8 @@ LINE_CORRECTION = 0.2
 STATE_COUNTER_TRIP = 500 
 
 #Motor speed
-SPEED = 50
+SPEED = 100
+BOX_SPEED_COEFFICIENT = 0.4
 
 #Colour sensor I2C bus
 I2C0_SDA = 16
@@ -75,7 +76,7 @@ robot.led.value(1)
 directions = [robot.go_forward, robot.reverse]
 
 robot.servo.duty_u16(SERVO_0)
-previous_state, state_counter, current_f = robot.start(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+previous_state, state_counter, current_f = robot.start(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
 while (box_num < 5):
     cur = -1
     while cur < (len(test_route) - 1):
@@ -94,20 +95,20 @@ while (box_num < 5):
         else:
             if node == False:
                 try:
-                    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+                    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
                 except:
                     robot.reverse()
             
             elif node == True:
                 print(next_node)
                 if (test_route[cur + 1] == "S") or (test_route[cur + 1] == "FIN"):
-                    previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+                    previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
 
                 elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
                     node_types[next_node](F3_ORIGINAL)
 
-                elif ((test_route[cur + 2] == "B") and (cur < (len(test_route) - 1))):
-                    node_types[next_node](F3_ORIGINAL)
+                #elif ((test_route[cur + 2] == "B") and (cur < (len(test_route) - 1))):
+                 #   node_types[next_node](F3_ORIGINAL)
 
                 else:
                     node_types[next_node](F2_ORIGINAL)
@@ -116,7 +117,7 @@ while (box_num < 5):
     if (box_inc == 0): #fetching box
         if (box_num == 4):
             break
-        RGB_inc = robot.get_box(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
+        RGB_inc = robot.get_box(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, BOX_SPEED_COEFFICIENT)
         print(RGB_inc) 
         test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
     elif (box_inc == 1): #dropping box or returning to home square
