@@ -81,9 +81,8 @@ class Vehicle:
       if previous_state != [0, 0]:
          state_counter = 0
          
-      self.left_motor.Forward(self.left_motor_speed * getting_box)
-      self.right_motor.Forward(self.right_motor_speed * getting_box)
-      
+         self.left_motor.Forward(self.left_motor_speed * getting_box)
+         self.right_motor.Forward(self.right_motor_speed * getting_box)
       
       return state_counter
       
@@ -131,14 +130,20 @@ class Vehicle:
       return state_counter, current_f
 
 
-   def leftPivot(self, f):
+   def leftPivot(self, f, previous_state):
       self.right_motor.Forward(self.right_motor_speed)
       self.left_motor.Reverse(f * self.left_motor_speed)
 
+      previous_state = [1, 1]
+      return previous_state
 
-   def rightPivot(self, f):
+
+   def rightPivot(self, f, previous_state):
       self.right_motor.Reverse(f * self.right_motor_speed)
       self.left_motor.Forward(self.left_motor_speed)
+
+      previous_state = [1, 1]
+      return previous_state
 
 
    def stop(self):
@@ -172,98 +177,110 @@ class Vehicle:
 
    
    #Turning right on a corner (CR)
-   def turn_Cright(self, f):
+   def turn_Cright(self, f, previous_state):
 
       left_val = self.sensor_left.reading()
       while (left_val == 1):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
 
       while (left_val == 0):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
+
+      return previous_state
 
    #Turning left on a corner (CL)
-   def turn_Cleft(self, f): #corner
+   def turn_Cleft(self, f, previous_state): #corner
 
       right_val = self.sensor_right.reading()
       while (right_val == 1):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
 
       while (right_val == 0):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
+
+      return previous_state
 
 
          
    #Turning right on a 'sideways T' (R)
-   def turn_right(self, f):
+   def turn_right(self, f, previous_state):
 
       Tleft_val = self.sensor_Tleft.reading()
       left_val = self.sensor_left.reading()
 
       while (Tleft_val == 0):
          Tleft_val = self.sensor_Tleft.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
 
       while (Tleft_val == 1):
          Tleft_val = self.sensor_Tleft.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
 
       while (left_val == 1):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
 
       while (left_val == 0):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
+
+      return previous_state
 
    #Turning left on a 'sideways T' (L)
-   def turn_left(self, f):
+   def turn_left(self, f, previous_state):
 
       Tright_val = self.sensor_Tright.reading()
       right_val = self.sensor_right.reading()
       
       while (Tright_val == 0):
          Tright_val = self.sensor_Tright.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
 
       while (Tright_val == 1):
          Tright_val = self.sensor_Tright.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
 
       while (right_val == 1):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
 
       while (right_val == 0):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
+
+      return previous_state
 
    #Turning right on 'head-on T' (TR)
-   def turn_Tright(self, f):
+   def turn_Tright(self, f, previous_state):
       left_val = self.sensor_left.reading()
       
       while (left_val == 1):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
 
       while (left_val == 0):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
+
+      return previous_state
 
    #Turning left on 'head-on T' (TL)
-   def turn_Tleft(self, f): 
+   def turn_Tleft(self, f, previous_state): 
       right_val = self.sensor_right.reading()
       
       while (right_val == 1):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
 
       while (right_val == 0):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
+
+      return previous_state
 
    #Continuing straight and ignoring any alternate paths (S)
    def ignore(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
@@ -277,41 +294,46 @@ class Vehicle:
          self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
 
    #Go back and drive off left
-   def reverse_left(self, f):
+   def reverse_left(self, f, previous_state):
       right_val = self.sensor_right.reading()
 
       while (right_val == 0):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
 
       while (right_val == 1):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
 
       while (right_val == 0):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
+
+      return previous_state
 
    #Go back and drive off right
-   def reverse_right(self, f):
+   def reverse_right(self, f, previous_state):
       left_val = self.sensor_left.reading()
 
       while (left_val == 0):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
 
       while (left_val == 1):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
 
       while (left_val == 0):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
+
+      return previous_state
 
    #After dropping off the box, perform 180 degree turn to the left.
-   def spin_left(self, f):
+   def spin_left(self, f, previous_state):
       state_counter = self.forward()
       sleep(0.5)
+      self.servo.duty_u16(self.min_servo_pos) #drops box
 
       self.reverse()
       sleep(0.5)
@@ -320,14 +342,16 @@ class Vehicle:
 
       while (right_val == 1):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
 
       while (right_val == 0):
          right_val = self.sensor_right.reading()
-         self.leftPivot(f)
+         previous_state = self.leftPivot(f, previous_state)
+
+      return previous_state
 
    #After dropping off the box, perform 180 degree turn to the right.
-   def spin_right(self, f):
+   def spin_right(self, f, previous_state):
       state_counter = self.forward()
       sleep(0.5)
       self.servo.duty_u16(self.min_servo_pos) #drops box
@@ -339,17 +363,49 @@ class Vehicle:
 
       while (left_val == 1):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
+         previous_state = self.rightPivot(f, previous_state)
 
       while (left_val == 0):
          left_val = self.sensor_left.reading()
-         self.rightPivot(f)
-   
-   def box_right(self,f):
-      self.forward()
-      sleep(0.2)
-      self.rightPivot(f)
-      sleep(1.1)
+         previous_state = self.rightPivot(f, previous_state)
+
+      return previous_state
+
+   def box_right(self,f, previous_state):
+      start_time = time()
+      current_time = start_time
+      while current_time <= (start_time + 0.2):
+         self.forward(previous_state)
+         current_time = time()
+      
+      print('forward done')
+
+      start_time = time()
+      current_time = start_time
+      while current_time <= (start_time + 0.95):
+         previous_state = self.rightPivot(f, previous_state)
+         current_time = time()
+      
+      print('right done')
+
+      return previous_state
+
+   def box_left(self, f, previous_state):
+      start_time = time()
+      current_time = start_time
+      while current_time <= (start_time + 0.2):
+         self.forward(previous_state)
+
+      print('forward done')
+
+      start_time = time()
+      current_time = start_time
+      while current_time <= (start_time + 0.95):
+         previous_state = self.leftPivot(f, previous_state)
+      
+      print('left done')
+
+      return previous_state
 
    #Picking up the box. (Takes f just to keep loop general)
    def box(self, f):
@@ -365,6 +421,7 @@ class Vehicle:
    def get_box(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
       print("aha")
       passed_node = False
+      found_box = False
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
       while(found_box == False):
@@ -380,7 +437,7 @@ class Vehicle:
             passed_node = True
       self.servo.duty_u16(self.max_servo_pos) #picks up box
       self.stop()
-      sleep(1)
+      sleep(2)
       RGB_inc = self.get_colour() #scans box colour
       if (passed_node == True):
          Tleft_val = self.sensor_Tleft.reading()

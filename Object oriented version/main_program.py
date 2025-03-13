@@ -36,7 +36,7 @@ I2C0_SCL = 17
 I2C0_BUS_NO = 0
 
 #Servo parameters
-SERVO_0 = 1800
+SERVO_0 = 1850
 SERVO_10 = 1500 
 SERVO_PIN = 15
 
@@ -55,7 +55,7 @@ robot = Vehicle(LEFT_MOTOR_DIR_PIN, LEFT_MOTOR_PWM_PIN,
                 I2C1_SDA, I2C1_SCL, I2C1_BUS_NO)
 
 
-previous_state = [0, 0]
+previous_state = [1, 1]
 state_counter = 0
 current_f = F1_ORIGINAL
 
@@ -63,7 +63,8 @@ current_f = F1_ORIGINAL
 
 node_types = {"L":robot.turn_left, "R":robot.turn_right, "S":robot.ignore, "CR":robot.turn_Cright, "CL":robot.turn_Cleft,
               "TR":robot.turn_Tright,"TL":robot.turn_Tleft, "RR":robot.reverse_right, "RL":robot.reverse_left, 
-              "SR":robot.spin_right, "SL":robot.spin_left, "B":robot.box,"FIN":robot.finish, "BR":robot.box_right}
+              "SR":robot.spin_right, "SL":robot.spin_left, "B":robot.box,"FIN":robot.finish, "BR":robot.box_right,
+              "BL":robot.box_left}
 
 #S for straight, CR CL for corners, TL TR for 'head on' t, L and R for side t
 test_route = tree[0]
@@ -105,13 +106,13 @@ while (box_num < 5):
                     previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
 
                 elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
-                    node_types[next_node](F3_ORIGINAL)
+                    node_types[next_node](F3_ORIGINAL, previous_state)
 
                 #elif ((test_route[cur + 2] == "B") and (cur < (len(test_route) - 1))):
                  #   node_types[next_node](F3_ORIGINAL)
 
                 else:
-                    node_types[next_node](F2_ORIGINAL)
+                    node_types[next_node](F2_ORIGINAL, previous_state)
                 
                 cur += 1
     if (box_inc == 0): #fetching box
