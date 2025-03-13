@@ -399,7 +399,7 @@ class Vehicle:
       return previous_state
 
    #Picking up the box. (Takes f just to keep loop general)
-   def box(self, f):
+   def box1(self, f):
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
 
@@ -408,42 +408,60 @@ class Vehicle:
          Tright_val = self.sensor_Tright.reading()
 
          self.reverse()
-   
-   def get_box(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
-      print("aha")
-      passed_node = False
-      found_box = False
-      Tleft_val = self.sensor_Tleft.reading()
-      Tright_val = self.sensor_Tright.reading()
-      while(found_box == False):
-         #print(self.distance_sensor.ping()-50,"mm")
-         distance = self.distance_sensor.ping()-40
-         print("distance:", distance)
-         if (distance < 15):
-            found_box = True
-            #sleep(0.5)
+    
+   def box(self):
+      pass
+      
+   def get_box1(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
+         print("aha")
+         passed_node = False
+         found_box = False
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
-         previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
-         if ((Tleft_val == 1) or (Tright_val == 1)):
-            passed_node = True
+         while(found_box == False):
+            #print(self.distance_sensor.ping()-50,"mm")
+            distance = self.distance_sensor.ping()-40
+            print("distance:", distance)
+            if (distance < 15):
+               found_box = True
+               #sleep(0.5)
+            Tleft_val = self.sensor_Tleft.reading()
+            Tright_val = self.sensor_Tright.reading()
+            previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
+            if ((Tleft_val == 1) or (Tright_val == 1)):
+               passed_node = True
+         self.servo.duty_u16(self.max_servo_pos) #picks up box
+         self.stop()
+         sleep(2)
+         RGB_inc = self.get_colour() #scans box colour
+         if (passed_node == True):
+            Tleft_val = self.sensor_Tleft.reading()
+            Tright_val = self.sensor_Tright.reading()
+            while ((Tleft_val == 0) and (Tright_val == 0)):
+               Tleft_val = self.sensor_Tleft.reading()
+               Tright_val = self.sensor_Tright.reading()
+               self.reverse()
+            while ((Tleft_val == 1) and (Tright_val == 1)):
+               Tleft_val = self.sensor_Tleft.reading()
+               Tright_val = self.sensor_Tright.reading()
+               self.reverse()
+         return RGB_inc
+      
+   def get_box(self):
+      #print("get box func")
       self.servo.duty_u16(self.max_servo_pos) #picks up box
       self.stop()
       sleep(2)
-      RGB_inc = self.get_colour() #scans box colour
-      if (passed_node == True):
+      RGB_inc = self.get_colour()
+      Tleft_val = self.sensor_Tleft.reading()
+      Tright_val = self.sensor_Tright.reading()
+      while ((Tleft_val == 1) or (Tright_val == 1)):
+         print("go back")
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
-         while ((Tleft_val == 0) and (Tright_val == 0)):
-            Tleft_val = self.sensor_Tleft.reading()
-            Tright_val = self.sensor_Tright.reading()
-            self.reverse()
-         while ((Tleft_val == 1) and (Tright_val == 1)):
-            Tleft_val = self.sensor_Tleft.reading()
-            Tright_val = self.sensor_Tright.reading()
-            self.reverse()
+         self.reverse()
       return RGB_inc
-         
+            
    def get_colour(self): #under construction
       colour_sensor_reading = self.colour_sensor.read('rgb')
       print(colour_sensor_reading)
@@ -473,17 +491,17 @@ class Vehicle:
 
 
       # if ((colour_sensor_reading[1] == colour_sensor_reading[2]) or ((colour[1] - 1) == colour[2]) or ((colour[1] + 1) == colour[2])): #green
-      #    RGB_inc = 2
-      # elif ((colour[2] >= colour[1]) and (colour[2] >= colour[0])): #blue
-      #    RGB_inc = 2
-      # elif ((colour[1] >= colour[0]) and (colour[1] >= colour[2])): #yellow
-      #    RGB_inc = 1
-      # elif ((colour[0] >= colour[1]) and (colour[0] >= colour[2])): #red
-      #    RGB_inc = 1
-      # #RGB_inc = random.randint(1,2)
-      # return RGB_inc
+         #    RGB_inc = 2
+         # elif ((colour[2] >= colour[1]) and (colour[2] >= colour[0])): #blue
+         #    RGB_inc = 2
+         # elif ((colour[1] >= colour[0]) and (colour[1] >= colour[2])): #yellow
+         #    RGB_inc = 1
+         # elif ((colour[0] >= colour[1]) and (colour[0] >= colour[2])): #red
+         #    RGB_inc = 1
+         # #RGB_inc = random.randint(1,2)
+         # return RGB_inc
 
-   #Starting position manoeuvring
+      #Starting position manoeuvring
    def start(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
@@ -503,7 +521,7 @@ class Vehicle:
       return previous_state, state_counter, current_f
 
 
-   #End up back in the box.
+      #End up back in the box.
    def finish(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()

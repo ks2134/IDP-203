@@ -63,7 +63,7 @@ current_f = F1_ORIGINAL
 
 node_types = {"L":robot.turn_left, "R":robot.turn_right, "S":robot.ignore, "CR":robot.turn_Cright, "CL":robot.turn_Cleft,
               "TR":robot.turn_Tright,"TL":robot.turn_Tleft, "RR":robot.reverse_right, "RL":robot.reverse_left, 
-              "SR":robot.spin_right, "SL":robot.spin_left, "B":robot.box,"FIN":robot.finish, "BR":robot.box_right,
+              "SR":robot.spin_right, "SL":robot.spin_left, "B":robot.get_box,"FIN":robot.finish, "BR":robot.box_right,
               "BL":robot.box_left}
 
 #S for straight, CR CL for corners, TL TR for 'head on' t, L and R for side t
@@ -88,41 +88,43 @@ while (box_num < 5):
             cur_dir = 1 
         else:
             cur_dir = 0
-        if (next_node == "B"):
+        #if (next_node == "B"):
             #while((robot.distance_sensor.ping()-50) > 30):
             #    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP)
-            print(next_node)
-            cur += 1
-        else:
-            if node == False:
-                try:
-                    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
-                except:
-                    robot.reverse()
+            #print(next_node)
+            #cur += 1
+        #else:
+        if node == False:
+            try:
+                previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
+            except:
+                robot.reverse()
+        
+        elif node == True:
+            #print(next_node)
+            if (test_route[cur + 1] == "S") or (test_route[cur + 1] == "FIN"):
+                previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
+
+            elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
+                previous_state = node_types[next_node](F3_ORIGINAL, previous_state)
             
-            elif node == True:
-                print(next_node)
-                if (test_route[cur + 1] == "S") or (test_route[cur + 1] == "FIN"):
-                    previous_state = node_types[next_node](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
+            #elif (test_route[cur + 1] == "BL") or (test_route[cur + 1] == "BR"):
+                #   previous_state = node_types[next_node](F3_ORIGINAL, previous_state, box_num)
 
-                elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
-                    previous_state = node_types[next_node](F3_ORIGINAL, previous_state)
+            #elif ((test_route[cur + 2] == "B") and (cur < (len(test_route) - 1))):
+                #   node_types[next_node](F3_ORIGINAL)
+            elif (test_route[cur + 1] == "B"):
+                RGB_inc = node_types[next_node]()
+
+            else:
+                previous_state = node_types[next_node](F2_ORIGINAL, previous_state)
                 
-                #elif (test_route[cur + 1] == "BL") or (test_route[cur + 1] == "BR"):
-                 #   previous_state = node_types[next_node](F3_ORIGINAL, previous_state, box_num)
-
-                #elif ((test_route[cur + 2] == "B") and (cur < (len(test_route) - 1))):
-                 #   node_types[next_node](F3_ORIGINAL)
-
-                else:
-                    previous_state = node_types[next_node](F2_ORIGINAL, previous_state)
-                
-                cur += 1
+            cur += 1
     if (box_inc == 0): #fetching box
         if (box_num == 4):
             break
-        RGB_inc = robot.get_box(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, BOX_SPEED_COEFFICIENT)
-        print(RGB_inc) 
+        #RGB_inc = robot.get_box()
+        #print(RGB_inc) 
         test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
     elif (box_inc == 1): #dropping box or returning to home square
         test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
