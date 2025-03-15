@@ -3,6 +3,8 @@ from time import sleep, time
 from colour_sensor import TCS34725
 from distance_sensor import VL53L0X
 
+box_counter = 0
+
 #Driving motor on robot. Inputs: pin1 = motor direction, pin2 = pwm pin
 class Motor:
    def __init__(self, dir_pin, pwm_pin):
@@ -38,8 +40,7 @@ class TrackSensor:
 class Vehicle:
    def __init__(self, left_motor_dir, left_motor_pwm, right_motor_dir, right_motor_pwm,
                  left_track, right_track, Tleft_track, Tright_track, led_pin, speed, 
-                 i2c0_sda, i2c0_scl, i2c0_bus_no, max_servo_pos, min_servo_pos, servo_pin,
-                 i2c1_sda, i2c1_scl, i2c1_bus_no):
+                 i2c0_sda, i2c0_scl, i2c0_bus_no, max_servo_pos, min_servo_pos, servo_pin, button_pin):
       
       #Setting up driving motors
       self.left_motor = Motor(left_motor_dir, left_motor_pwm)
@@ -57,6 +58,7 @@ class Vehicle:
 
       #Setting up miscellaneous peripheries
       self.led = Pin(led_pin, Pin.OUT)
+      self.button = Pin(button_pin, Pin.IN, Pin.PULL_DOWN)
 
       #Set slightly different motor speeds, in order to balance the two motors
       self.left_motor_speed = speed
@@ -69,10 +71,10 @@ class Vehicle:
       self.servo.freq(50)        #PWM Frequency set at 50Hz
 
       #Setting up distance sensor
-      self.i2c1_bus = I2C(i2c1_bus_no, sda=i2c1_sda, scl=i2c1_scl)
-      self.distance_sensor = VL53L0X(self.i2c1_bus)
-      self.distance_sensor.set_measurement_timing_budget(40000)
-      self.distance_sensor.set_Vcsel_pulse_period(self.distance_sensor.vcsel_period_type[0], 8)
+      #self.i2c1_bus = I2C(i2c1_bus_no, sda=i2c1_sda, scl=i2c1_scl)
+      #self.distance_sensor = VL53L0X(self.i2c1_bus)
+      # self.distance_sensor.set_measurement_timing_budget(40000)
+      # self.distance_sensor.set_Vcsel_pulse_period(self.distance_sensor.vcsel_period_type[0], 8)
 
       
 
@@ -372,30 +374,41 @@ class Vehicle:
       return previous_state
 
    def box_right(self,f, previous_state):
+      global box_counter
       self.forward(previous_state)
-      sleep(0.2)
+
+      if box_counter == 3:
+         sleep(0.2)
+      else:
+         sleep(0.1)
       
       print('forward done')
 
       previous_state = self.rightPivot(f, previous_state)
-      sleep(0.95)
+      sleep(1)
       
       print('right done')
 
+      box_counter += 1
       return previous_state
 
    def box_left(self, f, previous_state):
+      global box_counter
       
       self.forward(previous_state)
-      sleep(0.2)
+      if box_counter == 3:
+         sleep(0.2)
+      else:
+         sleep(0.1)
 
       print('forward done')
 
       previous_state = self.leftPivot(f, previous_state)
-      sleep(0.95)
+      sleep(1)
       
       print('left done')
 
+      box_counter += 1
       return previous_state
 
    #Picking up the box. (Takes f just to keep loop general)
@@ -412,6 +425,7 @@ class Vehicle:
    def box(self):
       pass
       
+   #get_box using Distance sensor
    def get_box1(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
          print("aha")
          passed_node = False
@@ -447,45 +461,63 @@ class Vehicle:
                self.reverse()
          return RGB_inc
       
+   #Get box without using distance sensor.
    def get_box(self):
       #print("get box func")
       self.servo.duty_u16(self.max_servo_pos) #picks up box
       self.stop()
-      sleep(2)
+      sleep(0.7)
+
       RGB_inc = self.get_colour()
+
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
+      
       while ((Tleft_val == 1) or (Tright_val == 1)):
-         print("go back")
+         #print("go back")
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
          self.reverse()
       return RGB_inc
             
    def get_colour(self): #under construction
-      colour_sensor_reading = self.colour_sensor.read('rgb')
-      print(colour_sensor_reading)
-      red, green, blue = colour_sensor_reading[0], colour_sensor_reading[1], colour_sensor_reading[2]
+      #[red, green, blue]
+      colour_values = [[], [], []]
 
-      only_colours = (red, green, blue)
-      maximum_colour_reading = max(only_colours)
+      for i in range(5):
+         colour_sensor_reading = self.colour_sensor.read('rgb')
+         print(colour_sensor_reading)
+         red, green, blue = colour_sensor_reading[0], colour_sensor_reading[1], colour_sensor_reading[2]
+         colour_values[0].append(red)
+         colour_values[1].append(green)
+         colour_values[2].append(blue)
+
+      avg_colour_values = []
+      for i in range(len(colour_values)):
+         avg_colour_values.append(int(sum(colour_values[i]) / len(colour_values)))
+
+      maximum_colour_reading = max(avg_colour_values)
+      avg_red = avg_colour_values[0]
+      avg_green = avg_colour_values[1]
+      avg_blue = avg_colour_values[2]
 
       #colour_sensor_reading format: (r, g, b, c)
-      #Checking for green
-      if (green == blue):
-         RGB_inc = 2
       
+      #Checking for red
+      if maximum_colour_reading == avg_red:
+         RGB_inc = 1
+
       #Checking for blue
-      elif maximum_colour_reading == blue:
+      elif maximum_colour_reading == avg_blue:
          RGB_inc = 2
 
       #Checking for yellow
-      elif maximum_colour_reading == green:
+      elif maximum_colour_reading == avg_green:
          RGB_inc = 1
 
-      #Checking for red
-      elif maximum_colour_reading == red:
-         RGB_inc = 1
+      #Checking for green
+      elif (avg_green == avg_blue):
+         RGB_inc = 2
 
       return RGB_inc
 
@@ -502,6 +534,8 @@ class Vehicle:
          # return RGB_inc
 
       #Starting position manoeuvring
+   
+   
    def start(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()
@@ -522,6 +556,8 @@ class Vehicle:
 
 
       #End up back in the box.
+   
+   
    def finish(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
       Tleft_val = self.sensor_Tleft.reading()
       Tright_val = self.sensor_Tright.reading()

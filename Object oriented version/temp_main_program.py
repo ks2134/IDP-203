@@ -18,6 +18,7 @@ RIGHT_TRACK_SENSOR_PIN = 11
 OUTER_RIGHT_TRACK_SENSOR_PIN = 8
 
 LED_PIN = 9
+BUTTON_PIN = 12
 
 F1_ORIGINAL = 0.7
 F2_ORIGINAL = 0.5
@@ -37,7 +38,7 @@ I2C0_BUS_NO = 0
 
 #Servo parameters
 SERVO_0 = 1850
-SERVO_10 = 1500 
+SERVO_10 = 1400 
 SERVO_PIN = 15
 
 #Time of Flight sensor I2C bus
@@ -51,14 +52,21 @@ robot = Vehicle(LEFT_MOTOR_DIR_PIN, LEFT_MOTOR_PWM_PIN,
                 LEFT_TRACK_SENSOR_PIN, RIGHT_TRACK_SENSOR_PIN,
                 OUTER_LEFT_TRACK_SENSOR_PIN, OUTER_RIGHT_TRACK_SENSOR_PIN,
                 LED_PIN, SPEED, I2C0_SDA, I2C0_SCL, I2C0_BUS_NO,
-                SERVO_10, SERVO_0, SERVO_PIN,
-                I2C1_SDA, I2C1_SCL, I2C1_BUS_NO)
+                SERVO_10, SERVO_0, SERVO_PIN, BUTTON_PIN)
 
 
 previous_state = [1, 1]
 state_counter = 0
 current_f = F1_ORIGINAL
+button_stop = False
 
+def button_callback(button):
+    global button_stop
+    button_stop = True
+
+
+while robot.button.value() != 1:
+    pass
 
 
 node_types = {"L":robot.turn_left, "R":robot.turn_right, "S":robot.ignore, "CR":robot.turn_Cright, "CL":robot.turn_Cleft,
@@ -78,7 +86,7 @@ directions = [robot.go_forward, robot.reverse]
 
 robot.servo.duty_u16(SERVO_0)
 previous_state, state_counter, current_f = robot.start(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
-while (box_num < 5):
+while (box_num < 5) and (button_stop != True):
     cur = -1
     while cur < (len(test_route) - 1):
         next_node = test_route[cur + 1]
@@ -131,5 +139,6 @@ while (box_num < 5):
         box_num += 1
     box_inc = abs(box_inc - 1)
 
-robot.stop()
 
+robot.led.value(0)
+robot.stop()
