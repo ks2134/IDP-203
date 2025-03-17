@@ -86,7 +86,7 @@ directions = [robot.go_forward, robot.reverse]
 
 robot.servo.duty_u16(SERVO_0)
 previous_state, state_counter, current_f = robot.start(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
-while (box_num < 5) and (button_stop != True):
+while (box_num < 9) and (button_stop != True):
     cur = -1
     while cur < (len(test_route) - 1):
         next_node = test_route[cur + 1]
@@ -129,7 +129,7 @@ while (box_num < 5) and (button_stop != True):
                 
             cur += 1
     if (box_inc == 0): #fetching box
-        if (box_num == 4):
+        if (box_num == 8):
             break
         #RGB_inc = robot.get_box()
         #print(RGB_inc) 

@@ -447,7 +447,7 @@ class Vehicle:
       #print("get box func")
       self.servo.duty_u16(self.max_servo_pos) #picks up box
       self.stop()
-      sleep(0.7)
+      sleep(0.5)
 
       RGB_inc = self.get_colour()
 
@@ -483,6 +483,10 @@ class Vehicle:
 
       #colour_sensor_reading format: (r, g, b, c)
       
+      #Checking for green
+      if ((avg_green == avg_blue) and (avg_red != maximum_colour_reading)):
+         RGB_inc = 2
+
       #Checking for red
       if maximum_colour_reading == avg_red:
          RGB_inc = 1
@@ -494,10 +498,6 @@ class Vehicle:
       #Checking for yellow
       elif maximum_colour_reading == avg_green:
          RGB_inc = 1
-
-      #Checking for green
-      elif (avg_green == avg_blue):
-         RGB_inc = 2
 
       return RGB_inc
 
