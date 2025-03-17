@@ -116,8 +116,8 @@ while (box_num < 5) and (button_stop != True):
             elif (test_route[cur + 1] == "SL") or (test_route[cur + 1] == "SR"):
                 previous_state = node_types[next_node](F3_ORIGINAL, previous_state)
             
-            #elif (test_route[cur + 1] == "BL") or (test_route[cur + 1] == "BR"):
-                #   previous_state = node_types[next_node](F3_ORIGINAL, previous_state, box_num)
+            elif (test_route[cur + 1] == "BL") or (test_route[cur + 1] == "BR"):
+                   previous_state = node_types[next_node](F3_ORIGINAL, previous_state, box_num)
 
             #elif ((test_route[cur + 2] == "B") and (cur < (len(test_route) - 1))):
                 #   node_types[next_node](F3_ORIGINAL)

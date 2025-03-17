@@ -3,7 +3,6 @@ from time import sleep, time
 from colour_sensor import TCS34725
 from distance_sensor import VL53L0X
 
-box_counter = 0
 
 #Driving motor on robot. Inputs: pin1 = motor direction, pin2 = pwm pin
 class Motor:
@@ -373,40 +372,29 @@ class Vehicle:
 
       return previous_state
 
-   def box_right(self,f, previous_state):
-      global box_counter
+   def box_right(self,f, previous_state, box_num):
       self.forward(previous_state)
 
-      if box_counter == 3:
+      if box_num == 3:
          sleep(0.2)
       else:
          sleep(0.1)
-      
-      print('forward done')
 
       previous_state = self.rightPivot(f, previous_state)
       sleep(1)
-      
-      print('right done')
 
       box_counter += 1
       return previous_state
 
-   def box_left(self, f, previous_state):
-      global box_counter
-      
+   def box_left(self, f, previous_state, box_num):    
       self.forward(previous_state)
-      if box_counter == 3:
+      if box_num == 3:
          sleep(0.2)
       else:
          sleep(0.1)
 
-      print('forward done')
-
       previous_state = self.leftPivot(f, previous_state)
       sleep(1)
-      
-      print('left done')
 
       box_counter += 1
       return previous_state
@@ -427,7 +415,7 @@ class Vehicle:
       
    #get_box using Distance sensor
    def get_box1(self, previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box):
-         print("aha")
+         
          passed_node = False
          found_box = False
          Tleft_val = self.sensor_Tleft.reading()
@@ -435,7 +423,7 @@ class Vehicle:
          while(found_box == False):
             #print(self.distance_sensor.ping()-50,"mm")
             distance = self.distance_sensor.ping()-40
-            print("distance:", distance)
+            
             if (distance < 15):
                found_box = True
                #sleep(0.5)
@@ -486,7 +474,6 @@ class Vehicle:
 
       for i in range(5):
          colour_sensor_reading = self.colour_sensor.read('rgb')
-         print(colour_sensor_reading)
          red, green, blue = colour_sensor_reading[0], colour_sensor_reading[1], colour_sensor_reading[2]
          colour_values[0].append(red)
          colour_values[1].append(green)
