@@ -374,29 +374,22 @@ class Vehicle:
 
    def box_right(self,f, previous_state, box_num):
       self.forward(previous_state)
-
-      if box_num == 3:
-         sleep(0.2)
-      else:
-         sleep(0.1)
+      
+      sleep(0.28)
 
       previous_state = self.rightPivot(f, previous_state)
-      sleep(1)
+      sleep(0.7)
 
-      box_counter += 1
       return previous_state
 
    def box_left(self, f, previous_state, box_num):    
       self.forward(previous_state)
-      if box_num == 3:
-         sleep(0.2)
-      else:
-         sleep(0.1)
+      
+      sleep(0.28)
 
       previous_state = self.leftPivot(f, previous_state)
-      sleep(1)
+      sleep(0.7)
 
-      box_counter += 1
       return previous_state
 
    #Picking up the box. (Takes f just to keep loop general)
@@ -556,7 +549,7 @@ class Vehicle:
          previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
 
       dummy = self.forward()
-      sleep(0.5)
+      sleep(0.7)
 
       return previous_state, state_counter, current_f
 
