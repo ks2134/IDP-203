@@ -1,11 +1,35 @@
 from machine import Pin, PWM, I2C
 from time import sleep, time
 from colour_sensor import TCS34725
-#from distance_sensor import VL53L0X
+##from distance_sensor import VL53L0X
 
 
 #Driving motor on robot. Inputs: pin1 = motor direction, pin2 = pwm pin
 class Motor:
+   """
+   Description
+   -----------
+   Class representing one of the driving motors on the robot and sets up control for the two directions the robot can travel in 
+   (Forward and Reverse).
+   
+   Attributes
+   ----------
+   dir_pin : int
+      Direction control pin for the motor (see pinout diagram for Pi HAT for the correct pin for each motor)
+   pwm_pin : int
+      PWM pin for speed control for the motor (again see pinout diagram for the correct pin values)
+   
+   Methods
+   -------
+   off()
+      Turn motor off
+   Forward(speed: int)
+      Drive motor in the forward direction at specified speed (0 to 100)
+   Reverse(speed: int)
+      Drive motor in reverse direction at specified speed (0 to 100)   
+   """
+
+   def __init__(self, dir_pin: int, pwm_pin: int):
    """
    Description
    -----------
@@ -39,14 +63,19 @@ class Motor:
       
    def off(self):
       """Turn off the motor (sets duty cycle to 0)"""
+      """Turn off the motor (sets duty cycle to 0)"""
       self.pwm1.duty_u16(0)
 
+   def Forward(self, speed: int):
+      """Drives motor in forward direction at specified speed (0 to 100)"""
    def Forward(self, speed: int):
       """Drives motor in forward direction at specified speed (0 to 100)"""
       self.m1Dir.value(1) # forward = 1 reverse = 0 motor 1
       #self.pwm1.duty_u16(int(65535*100/100)) # speed range 0-100 motor 1
       self.pwm1.duty_u16(int(65535*speed/100)) # speed range 0-100 motor 1
 
+   def Reverse(self, speed: int):
+      """Drives motor in reverse direction at specified speed (0 to 100)"""
    def Reverse(self, speed: int):
       """Drives motor in reverse direction at specified speed (0 to 100)"""
       self.m1Dir.value(0)
@@ -71,8 +100,26 @@ class TrackSensor:
       Returns the sensor reading at that instant (1 - white, 0 - black)
    """
    def __init__(self, pin: int):
+   """
+   Description
+   -----------
+   Class representing a line sensor on the robot, which is used for general line following, or for detecting and implimenting turns.
+
+   Attributes
+   ----------
+   pin: int
+      GPIO Pin the data output of the sensor is connected to.
+
+   Methods
+   -------
+   reading() -> int
+      Returns the sensor reading at that instant (1 - white, 0 - black)
+   """
+   def __init__(self, pin: int):
       self.sensor_pin = Pin(pin, Pin.IN, Pin.PULL_DOWN)
 
+   def reading(self) -> int:
+      """Return current value of sensor: 1 - white, 0 - black"""
    def reading(self) -> int:
       """Return current value of sensor: 1 - white, 0 - black"""
       return self.sensor_pin.value()
@@ -237,6 +284,7 @@ class Vehicle:
       self.max_servo_pos = max_servo_pos
       self.min_servo_pos = min_servo_pos
       self.servo = PWM(Pin(servo_pin))
+      self.servo.freq(50)                 #PWM Frequency set at 50Hz
       self.servo.freq(50)                 #PWM Frequency set at 50Hz
 
       #Setting up distance sensor
@@ -591,10 +639,10 @@ class Vehicle:
       Returns previous_state."""
 
       self.forward(previous_state)
-      sleep(0.28)
+      sleep(0.32)
 
       previous_state = self.rightPivot(f, previous_state)
-      sleep(0.7)
+      sleep(0.75)
 
       return previous_state
 
@@ -632,6 +680,7 @@ class Vehicle:
          Tleft_val = self.sensor_Tleft.reading()
          Tright_val = self.sensor_Tright.reading()
          self.reverse()
+
 
       return RGB_inc
    

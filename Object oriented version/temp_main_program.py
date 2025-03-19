@@ -108,10 +108,16 @@ while (box_num < 9):
             cur_dir = 0
 
         if node == False:
-            try:
-                previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
-            except:
-                robot.reverse()
+            if (test_route[cur + 1] == "B"):
+                try:
+                    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, 0, STATE_COUNTER_TRIP, 1)
+                except:
+                    robot.reverse()
+            else:
+                try:
+                    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
+                except:
+                    robot.reverse()
         
         elif node == True:
             #print(next_node)
