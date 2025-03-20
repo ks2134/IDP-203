@@ -76,7 +76,7 @@ while robot.button.value() != 1:
 node_types = {"L":robot.turn_left, "R":robot.turn_right, "S":robot.ignore, "CR":robot.turn_Cright, "CL":robot.turn_Cleft,
               "TR":robot.turn_Tright,"TL":robot.turn_Tleft, "RR":robot.reverse_right, "RL":robot.reverse_left, 
               "SR":robot.spin_right, "SL":robot.spin_left, "B":robot.get_box,"FIN":robot.finish, "BR":robot.box_right,
-              "BL":robot.box_left}
+              "BL":robot.box_left, "BR1":robot.box_right_1}
 
 test_route = tree[0]
 
@@ -89,11 +89,10 @@ directions = [robot.go_forward, robot.reverse]
 
 robot.servo.duty_u16(SERVO_0)
 previous_state, state_counter, current_f = robot.start(previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
-while (box_num < 9):
+while (box_num < 8):
     cur = -1
     while cur < (len(test_route) - 1):
         current_button_value = robot.button.value()
-        #print(current_button_value)
         
         if current_button_value == 1:
             button_stop = True
@@ -108,17 +107,11 @@ while (box_num < 9):
             cur_dir = 0
 
         if node == False:
-            if (test_route[cur + 1] == "B"):
-                try:
-                    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, 0, STATE_COUNTER_TRIP, 1)
-                except:
-                    robot.reverse()
-            else:
-                try:
-                    previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
-                except:
-                    robot.reverse()
-        
+            try:
+                previous_state, state_counter, current_f = directions[cur_dir](previous_state, F1_ORIGINAL, current_f, state_counter, LINE_CORRECTION, STATE_COUNTER_TRIP, 1)
+            except:
+                robot.reverse()
+    
         elif node == True:
             #print(next_node)
             if (test_route[cur + 1] == "S") or (test_route[cur + 1] == "FIN"):
@@ -128,10 +121,11 @@ while (box_num < 9):
                 previous_state = node_types[next_node](F3_ORIGINAL, previous_state)
             
             elif (test_route[cur + 1] == "BL") or (test_route[cur + 1] == "BR"):
-                   previous_state = node_types[next_node](F3_ORIGINAL, previous_state)
+                previous_state = node_types[next_node](F3_ORIGINAL, previous_state)
+            
+            elif (test_route[cur + 1] == "BR1"):
+                previous_state = node_types[next_node](F3_ORIGINAL, previous_state)
 
-            #elif ((test_route[cur + 2] == "B") and (cur < (len(test_route) - 1))):
-                #   node_types[next_node](F3_ORIGINAL)
             elif (test_route[cur + 1] == "B"):
                 RGB_inc = node_types[next_node]()
 
@@ -145,10 +139,9 @@ while (box_num < 9):
     else:
             
         if (box_inc == 0): #fetching box
-            if (box_num == 8):
+            if (box_num == 7):
                 break
-            #RGB_inc = robot.get_box()
-            #print(RGB_inc) 
+
             test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]
         elif (box_inc == 1): #dropping box or returning to home square
             test_route = tree[4 * box_num + 2 * box_inc + RGB_inc]

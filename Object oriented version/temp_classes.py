@@ -21,65 +21,33 @@ class Motor:
    
    Methods
    -------
-   off()
-      Turn motor off
-   Forward(speed: int)
-      Drive motor in the forward direction at specified speed (0 to 100)
-   Reverse(speed: int)
-      Drive motor in reverse direction at specified speed (0 to 100)   
+   * off()
+      * Turn motor off
+   * Forward(speed: int)
+      * Drive motor in the forward direction at specified speed (0 to 100)
+   * Reverse(speed: int)
+      * Drive motor in reverse direction at specified speed (0 to 100)   
    """
 
    def __init__(self, dir_pin: int, pwm_pin: int):
-   """
-   Description
-   -----------
-   Class representing one of the driving motors on the robot and sets up control for the two directions the robot can travel in 
-   (Forward and Reverse).
-   
-   Attributes
-   ----------
-   dir_pin : int
-      Direction control pin for the motor (see pinout diagram for Pi HAT for the correct pin for each motor)
-   pwm_pin : int
-      PWM pin for speed control for the motor (again see pinout diagram for the correct pin values)
-   
-   Methods
-   -------
-   off()
-      Turn motor off
-   Forward(speed: int)
-      Drive motor in the forward direction at specified speed (0 to 100)
-   Reverse(speed: int)
-      Drive motor in reverse direction at specified speed (0 to 100)   
-   """
-
-   def __init__(self, dir_pin: int, pwm_pin: int):
-      #self.m1Dir = Pin(7 , Pin.OUT) # set motor direction
       self.m1Dir = Pin(dir_pin , Pin.OUT) # set motor direction
-      #self.pwm1 = PWM(Pin(6)) # set speed
       self.pwm1 = PWM(Pin(pwm_pin)) # set speed
       self.pwm1.freq(1000) # set max frequency
       self.pwm1.duty_u16(0) # set duty cycle
       
    def off(self):
       """Turn off the motor (sets duty cycle to 0)"""
-      """Turn off the motor (sets duty cycle to 0)"""
+
       self.pwm1.duty_u16(0)
 
    def Forward(self, speed: int):
       """Drives motor in forward direction at specified speed (0 to 100)"""
-   def Forward(self, speed: int):
-      """Drives motor in forward direction at specified speed (0 to 100)"""
       self.m1Dir.value(1) # forward = 1 reverse = 0 motor 1
-      #self.pwm1.duty_u16(int(65535*100/100)) # speed range 0-100 motor 1
       self.pwm1.duty_u16(int(65535*speed/100)) # speed range 0-100 motor 1
 
    def Reverse(self, speed: int):
       """Drives motor in reverse direction at specified speed (0 to 100)"""
-   def Reverse(self, speed: int):
-      """Drives motor in reverse direction at specified speed (0 to 100)"""
       self.m1Dir.value(0)
-      #self.pwm1.duty_u16(int(65535*30/100))
       self.pwm1.duty_u16(int(65535*speed/100))
 
 
@@ -96,30 +64,13 @@ class TrackSensor:
 
    Methods
    -------
-   reading() -> int
-      Returns the sensor reading at that instant (1 - white, 0 - black)
+   * reading() -> int
+      * Returns the sensor reading at that instant (1 - white, 0 - black)
    """
-   def __init__(self, pin: int):
-   """
-   Description
-   -----------
-   Class representing a line sensor on the robot, which is used for general line following, or for detecting and implimenting turns.
 
-   Attributes
-   ----------
-   pin: int
-      GPIO Pin the data output of the sensor is connected to.
-
-   Methods
-   -------
-   reading() -> int
-      Returns the sensor reading at that instant (1 - white, 0 - black)
-   """
    def __init__(self, pin: int):
       self.sensor_pin = Pin(pin, Pin.IN, Pin.PULL_DOWN)
 
-   def reading(self) -> int:
-      """Return current value of sensor: 1 - white, 0 - black"""
    def reading(self) -> int:
       """Return current value of sensor: 1 - white, 0 - black"""
       return self.sensor_pin.value()
@@ -645,6 +596,18 @@ class Vehicle:
       sleep(0.75)
 
       return previous_state
+   
+   def box_right_1(self, f:float, previous_state:list):
+      """Method to turn in to face box closed to home zone, when approaching collection from the right hand side.
+      Corresponds to node 'BR' on the tree. Returns previous_state."""
+
+      self.forward(previous_state)
+      sleep(0.37)
+
+      previous_state = self.rightPivot(f, previous_state)
+      sleep(0.75)
+
+      return previous_state
 
 
    def box_left(self, f:float, previous_state:list):
@@ -708,14 +671,20 @@ class Vehicle:
       avg_green = avg_colour_values[1]
       avg_blue = avg_colour_values[2]
 
-      #colour_sensor_reading format: (r, g, b, c)
+      #colour_sensor_reading format: ,(r, g b, c)
+
+      print(avg_colour_values)
+
+      #Edge case where all 3 colour readings are the same.
+      if (avg_green == avg_blue == avg_red):
+         RGB_inc = 2
       
       #Checking for green
-      if ((avg_green == avg_blue) and (avg_red != maximum_colour_reading)):
+      elif (((avg_green == avg_blue) or (abs(avg_blue - avg_green) == 1)) and (avg_red != maximum_colour_reading)):
          RGB_inc = 2
 
       #Checking for red
-      if maximum_colour_reading == avg_red:
+      elif maximum_colour_reading == avg_red:
          RGB_inc = 1
 
       #Checking for blue
@@ -726,22 +695,8 @@ class Vehicle:
       elif maximum_colour_reading == avg_green:
          RGB_inc = 1
 
+      print(RGB_inc)
       return RGB_inc
-
-
-      # if ((colour_sensor_reading[1] == colour_sensor_reading[2]) or ((colour[1] - 1) == colour[2]) or ((colour[1] + 1) == colour[2])): #green
-         #    RGB_inc = 2
-         # elif ((colour[2] >= colour[1]) and (colour[2] >= colour[0])): #blue
-         #    RGB_inc = 2
-         # elif ((colour[1] >= colour[0]) and (colour[1] >= colour[2])): #yellow
-         #    RGB_inc = 1
-         # elif ((colour[0] >= colour[1]) and (colour[0] >= colour[2])): #red
-         #    RGB_inc = 1
-         # #RGB_inc = random.randint(1,2)
-         # return RGB_inc
-
-      #Starting position manoeuvring
-   
 
    
    def start(self, previous_state:list, F1_ORIGINAL:float, current_f:float, state_counter:int, line_correction:int,
@@ -764,9 +719,6 @@ class Vehicle:
          previous_state, state_counter, current_f = self.go_forward(previous_state, F1_ORIGINAL, current_f, state_counter, line_correction, state_counter_trip, getting_box)
 
       return previous_state, state_counter, current_f
-
-
-      #End up back in the box.
    
    
    def finish(self, previous_state:list, F1_ORIGINAL:float, current_f:float, state_counter:int, line_correction:int,
