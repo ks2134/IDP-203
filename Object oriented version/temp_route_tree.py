@@ -21,10 +21,6 @@ tree = [["TR", "TL", "S", "CL", "BL", "B"], #0 start route to 18
         ["SR", "S", "L", "BL","B"], #4 G/B to 19
         ["RR","S","TL","S"], #5 19 to Y/R
         ["RL","TR","S"], #6 19 to G/B
-        ["SL","S","R","L","BL","B"], #7 Y/R to 17
-        ["SR","S","L","S","R","BL","B"], #8 G/B to 17
-        ["RL","TR","TL","S"], #9 17 to Y/R
-        ["RL","TL","S","TR","S"], #10 17 to G/B
         ["SL","R","BL","B"], #Y/R to 16
         ["SR","L","S","BR","B"], #G/B to 16
         ["RL", "TL"], #1 16 to Y/R
